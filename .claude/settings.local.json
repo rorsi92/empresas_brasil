@@ -14,7 +14,10 @@
       "Bash(time curl:*)",
       "Bash(timeout:*)",
       "Bash(find:*)",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
