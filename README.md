@@ -1,12 +1,13 @@
 # 🏢 Sistema de Busca de Empresas Brasileiras
 
-Sistema completo para busca e visualização de dados de empresas brasileiras usando dados da Receita Federal via Railway PostgreSQL.
+Sistema completo para busca e visualização de **+66 milhões de empresas brasileiras** com dados completos da Receita Federal via Railway PostgreSQL.
 
 ## ✨ Funcionalidades
 
 ### 🔍 Busca Avançada
+- **+66 milhões de empresas** da Receita Federal
 - Filtros por UF, situação cadastral, segmento de negócio
-- Busca de 1.000 a 50.000 empresas
+- Busca de 1.000 a 50.000 empresas por consulta
 - Performance otimizada (1000 empresas em ~4-5 segundos)
 
 ### 📊 Dados Completos (23 Colunas)
@@ -59,7 +60,7 @@ npm run dev
 
 - **Backend**: Node.js + Express + PostgreSQL (Railway)
 - **Frontend**: React + Vite + Styled Components
-- **Banco**: +25M registros da Receita Federal
+- **Banco**: +66M empresas da Receita Federal (+25M sócios)
 
 ---
 
