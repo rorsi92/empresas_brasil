@@ -183,8 +183,9 @@ const ResultsInfo = styled.div`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  min-width: 2500px;
+  min-width: 3280px;
   font-size: 0.85rem;
+  table-layout: fixed;
 `;
 
 const Th = styled.th`
@@ -196,6 +197,30 @@ const Th = styled.th`
   border-bottom: 1px solid rgba(0, 204, 255, 0.3);
   font-size: 0.8rem;
   white-space: nowrap;
+  
+  &:nth-child(1) { width: 120px; } /* CNPJ */
+  &:nth-child(2) { width: 200px; } /* Razão Social */
+  &:nth-child(3) { width: 150px; } /* Nome Fantasia */
+  &:nth-child(4) { width: 80px; } /* Matriz/Filial */
+  &:nth-child(5) { width: 250px; } /* Endereço */
+  &:nth-child(6) { width: 50px; } /* UF */
+  &:nth-child(7) { width: 120px; } /* Município */
+  &:nth-child(8) { width: 80px; } /* CEP */
+  &:nth-child(9) { width: 120px; } /* Telefones */
+  &:nth-child(10) { width: 150px; } /* Email */
+  &:nth-child(11) { width: 80px; } /* Situação */
+  &:nth-child(12) { width: 90px; } /* Data Situação */
+  &:nth-child(13) { width: 80px; } /* CNAE Principal */
+  &:nth-child(14) { width: 180px; } /* Descrição CNAE */
+  &:nth-child(15) { width: 150px; } /* CNAE Secundária */
+  &:nth-child(16) { width: 90px; } /* Data Início */
+  &:nth-child(17) { width: 150px; } /* Natureza Jurídica */
+  &:nth-child(18) { width: 100px; } /* Porte */
+  &:nth-child(19) { width: 100px; } /* Capital Social */
+  &:nth-child(20) { width: 100px; } /* Simples Nacional */
+  &:nth-child(21) { width: 100px; } /* MEI */
+  &:nth-child(22) { width: 320px; } /* Sócios */
+  &:nth-child(23) { width: 280px; } /* Representantes */
 `;
 
 const Td = styled.td`
@@ -204,6 +229,32 @@ const Td = styled.td`
   color: #e0e0e0;
   font-size: 0.8rem;
   vertical-align: top;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  
+  &:nth-child(1) { width: 120px; } /* CNPJ */
+  &:nth-child(2) { width: 200px; } /* Razão Social */
+  &:nth-child(3) { width: 150px; } /* Nome Fantasia */
+  &:nth-child(4) { width: 80px; } /* Matriz/Filial */
+  &:nth-child(5) { width: 250px; } /* Endereço */
+  &:nth-child(6) { width: 50px; } /* UF */
+  &:nth-child(7) { width: 120px; } /* Município */
+  &:nth-child(8) { width: 80px; } /* CEP */
+  &:nth-child(9) { width: 120px; } /* Telefones */
+  &:nth-child(10) { width: 150px; } /* Email */
+  &:nth-child(11) { width: 80px; } /* Situação */
+  &:nth-child(12) { width: 90px; } /* Data Situação */
+  &:nth-child(13) { width: 80px; } /* CNAE Principal */
+  &:nth-child(14) { width: 180px; } /* Descrição CNAE */
+  &:nth-child(15) { width: 150px; } /* CNAE Secundária */
+  &:nth-child(16) { width: 90px; } /* Data Início */
+  &:nth-child(17) { width: 150px; } /* Natureza Jurídica */
+  &:nth-child(18) { width: 100px; } /* Porte */
+  &:nth-child(19) { width: 100px; } /* Capital Social */
+  &:nth-child(20) { width: 100px; } /* Simples Nacional */
+  &:nth-child(21) { width: 100px; } /* MEI */
+  &:nth-child(22) { width: 320px; } /* Sócios */
+  &:nth-child(23) { width: 280px; } /* Representantes */
 `;
 
 const Tr = styled.tr`
@@ -885,10 +936,10 @@ const Dashboard = () => {
                       <Td>{empresa.situacaoDescricao || '-'}</Td>
                       <Td>{empresa.dataSituacao || '-'}</Td>
                       <Td>{empresa.cnaePrincipal || '-'}</Td>
-                      <Td style={{maxWidth: '200px', fontSize: '0.8rem'}}>{empresa.cnaeDescricao || '-'}</Td>
-                      <Td style={{maxWidth: '150px', fontSize: '0.8rem'}}>{empresa.cnaeSecundaria || '-'}</Td>
+                      <Td>{empresa.cnaeDescricao || '-'}</Td>
+                      <Td>{empresa.cnaeSecundaria || '-'}</Td>
                       <Td>{empresa.dataInicioAtividades || '-'}</Td>
-                      <Td style={{maxWidth: '150px', fontSize: '0.8rem'}}>{empresa.naturezaJuridicaDescricao || '-'}</Td>
+                      <Td>{empresa.naturezaJuridicaDescricao || '-'}</Td>
                       <Td>{empresa.porteDescricao || '-'}</Td>
                       <Td>{formatCapitalSocial(empresa.capitalSocial)}</Td>
                       <Td>
@@ -899,7 +950,7 @@ const Dashboard = () => {
                         {empresa.opcaoMei === 'S' ? '✅ Sim' : empresa.opcaoMei === 'N' ? '❌ Não' : '-'}
                         {empresa.dataOpcaoMei && <div style={{fontSize: '0.7rem'}}>Desde: {empresa.dataOpcaoMei}</div>}
                       </Td>
-                      <Td style={{maxWidth: '250px'}}>
+                      <Td>
                         {empresa.socios && empresa.socios.length > 0 ? (
                           <div>
                             <div 
@@ -923,13 +974,20 @@ const Dashboard = () => {
                               </div>
                             </div>
                             {expandedSocios[index] && (
-                              <div style={{marginLeft: '20px'}}>
+                              <div style={{marginLeft: '20px', maxHeight: '200px', overflowY: 'auto'}}>
                                 {empresa.socios.map((socio, socioIndex) => (
-                                  <div key={socioIndex} style={{marginBottom: '6px', fontSize: '0.8rem', borderBottom: '1px solid rgba(0,255,170,0.1)', paddingBottom: '4px'}}>
+                                  <div key={socioIndex} style={{
+                                    marginBottom: '8px', 
+                                    fontSize: '0.75rem', 
+                                    borderBottom: '1px solid rgba(0,255,170,0.1)', 
+                                    paddingBottom: '6px',
+                                    wordBreak: 'break-word',
+                                    lineHeight: '1.3'
+                                  }}>
                                     <div><strong style={{color: '#00ffaa'}}>{socio.nome}</strong></div>
-                                    <div>{socio.qualificacao_descricao}</div>
-                                    <div>CPF: {socio.cpf_cnpj}</div>
-                                    <div>Desde: {socio.data_entrada}</div>
+                                    <div style={{color: '#ccc', marginTop: '2px'}}>{socio.qualificacao_descricao}</div>
+                                    <div style={{color: '#999', marginTop: '1px'}}>CPF: {socio.cpf_cnpj}</div>
+                                    <div style={{color: '#999', marginTop: '1px'}}>Desde: {socio.data_entrada}</div>
                                   </div>
                                 ))}
                               </div>
@@ -939,7 +997,7 @@ const Dashboard = () => {
                           <div style={{color: '#666'}}>Sem dados</div>
                         )}
                       </Td>
-                      <Td style={{maxWidth: '200px'}}>
+                      <Td>
                         {empresa.socios && empresa.socios.some(s => s.representante_legal_nome) ? (
                           <div>
                             {(() => {
@@ -967,12 +1025,19 @@ const Dashboard = () => {
                                     </div>
                                   </div>
                                   {expandedRepresentantes[index] && (
-                                    <div style={{marginLeft: '20px'}}>
+                                    <div style={{marginLeft: '20px', maxHeight: '200px', overflowY: 'auto'}}>
                                       {representantes.map((socio, repIndex) => (
-                                        <div key={repIndex} style={{marginBottom: '6px', fontSize: '0.8rem', borderBottom: '1px solid rgba(255,170,0,0.1)', paddingBottom: '4px'}}>
+                                        <div key={repIndex} style={{
+                                          marginBottom: '8px', 
+                                          fontSize: '0.75rem', 
+                                          borderBottom: '1px solid rgba(255,170,0,0.1)', 
+                                          paddingBottom: '6px',
+                                          wordBreak: 'break-word',
+                                          lineHeight: '1.3'
+                                        }}>
                                           <div><strong style={{color: '#ffaa00'}}>{socio.representante_legal_nome}</strong></div>
-                                          <div>{socio.representante_legal_qualificacao_descricao}</div>
-                                          <div>CPF: {socio.representante_legal_cpf}</div>
+                                          <div style={{color: '#ccc', marginTop: '2px'}}>{socio.representante_legal_qualificacao_descricao}</div>
+                                          <div style={{color: '#999', marginTop: '1px'}}>CPF: {socio.representante_legal_cpf}</div>
                                         </div>
                                       ))}
                                     </div>
