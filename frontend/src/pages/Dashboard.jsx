@@ -12,89 +12,28 @@ const Container = styled.div`
 
 const Header = styled.header`
   background: 
-    var(--glass-secondary),
-    var(--glass-primary);
-  backdrop-filter: var(--blur-heavy);
-  -webkit-backdrop-filter: var(--blur-heavy);
-  border-bottom: 2px solid var(--glass-border-blue);
-  color: var(--text-primary);
+    linear-gradient(135deg, rgba(0, 255, 170, 0.1) 0%, rgba(0, 136, 204, 0.1) 100%),
+    rgba(15, 15, 35, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 255, 170, 0.2);
+  color: #e0e0e0;
   padding: 1.5rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: var(--shadow-data);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  overflow: hidden;
-  
-  /* Data flow effect */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, 
-      transparent, 
-      var(--electric-blue), 
-      var(--data-green),
-      var(--electric-purple), 
-      transparent
-    );
-    animation: dataFlow 3s ease-in-out infinite;
-  }
-  
-  /* Neural network overlay */
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-      radial-gradient(circle at 20% 20%, rgba(0, 217, 255, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 35%);
-    pointer-events: none;
-    animation: neuralPulse var(--pulse-speed) ease-in-out infinite;
-  }
+  box-shadow: 
+    0 4px 20px rgba(0, 255, 170, 0.1),
+    0 0 0 1px rgba(0, 255, 170, 0.1);
+  position: relative;
 `;
 
 const Title = styled.h1`
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.875rem;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #00ffaa;
+  text-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
   margin: 0;
-  letter-spacing: -0.02em;
-  position: relative;
-  z-index: 10;
-  
-  /* Electric gradient effect */
-  background: linear-gradient(135deg, 
-    var(--electric-blue) 0%,
-    var(--text-primary) 30%,
-    var(--electric-purple) 60%,
-    var(--data-green) 100%
-  );
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: dataFlow 4s ease-in-out infinite;
-  
-  /* Data terminal prefix */
-  &::before {
-    content: 'DB://';
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--data-green);
-    margin-right: 0.5rem;
-    opacity: 0.8;
-    -webkit-text-fill-color: var(--data-green);
-  }
 `;
 
 const UserInfo = styled.div`
@@ -104,48 +43,19 @@ const UserInfo = styled.div`
 `;
 
 const LogoutButton = styled.button`
-  background: var(--glass-accent);
-  backdrop-filter: var(--blur-medium);
-  border: 1px solid var(--glass-border-purple);
-  color: var(--text-secondary);
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #ff4757, #ff6b7a);
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  z-index: 10;
-  overflow: hidden;
-  
-  /* Terminal style prefix */
-  &::after {
-    content: 'EXIT';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    opacity: 0;
-    color: var(--neural-pink);
-    transition: opacity 0.3s ease;
-  }
+  font-weight: 500;
+  transition: all 0.3s ease;
   
   &:hover {
-    background: rgba(255, 107, 157, 0.1);
-    border-color: var(--neural-pink);
-    color: var(--neural-pink);
-    transform: translateY(-2px);
-    box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);
-    
-    &::after {
-      opacity: 1;
-    }
-  }
-  
-  &:active {
-    transform: translateY(0);
+    background: linear-gradient(135deg, #ff3742, #ff5722);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
   }
 `;
 
@@ -156,252 +66,101 @@ const Content = styled.div`
 `;
 
 const SearchSection = styled.section`
-  background: 
-    var(--glass-secondary),
-    var(--glass-primary);
-  backdrop-filter: var(--blur-medium);
-  -webkit-backdrop-filter: var(--blur-medium);
+  background: rgba(15, 15, 35, 0.8);
+  backdrop-filter: blur(10px);
   border-radius: 12px;
-  padding: 2.5rem 2rem 2rem;
+  padding: 2rem;
   margin-bottom: 2rem;
-  border: 1px solid var(--glass-border-blue);
-  box-shadow: var(--shadow-data);
-  position: relative;
-  overflow: hidden;
-  
-  /* Query console header */
-  &::before {
-    content: 'QUERY_CONSOLE.SQL';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(90deg, var(--electric-blue), var(--electric-purple));
-    color: var(--terminal-black);
-    padding: 0.5rem 1rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--glass-border-blue);
-  }
-  
-  /* Data connection lines */
-  &::after {
-    content: '';
-    position: absolute;
-    top: 2.5rem;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-      radial-gradient(circle at 15% 25%, rgba(0, 217, 255, 0.08) 0%, transparent 35%),
-      radial-gradient(circle at 85% 75%, rgba(139, 92, 246, 0.06) 0%, transparent 30%),
-      linear-gradient(135deg, transparent, rgba(0, 255, 136, 0.02), transparent);
-    pointer-events: none;
-    animation: neuralPulse 3s ease-in-out infinite;
-  }
+  border: 1px solid rgba(0, 255, 170, 0.2);
 `;
 
 
 const FiltersGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.25rem;
+  gap: 1rem;
   margin-bottom: 1.5rem;
-  position: relative;
-  z-index: 10;
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  position: relative;
-  
-  /* Data node connection */
-  &::before {
-    content: '';
-    position: absolute;
-    top: -0.5rem;
-    left: -0.5rem;
-    width: 4px;
-    height: 4px;
-    background: var(--electric-blue);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--electric-blue);
-    animation: neuralPulse 2s ease-in-out infinite;
-  }
 `;
 
 const Label = styled.label`
-  color: var(--text-electric);
-  margin-bottom: 0.6rem;
-  font-weight: 600;
-  font-size: 0.8rem;
-  font-family: 'JetBrains Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  position: relative;
-  
-  /* Terminal prompt style */
-  &::before {
-    content: '$ ';
-    color: var(--data-green);
-    margin-right: 0.25rem;
-  }
+  color: #00ccff;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
 `;
 
 const Select = styled.select`
-  background: var(--glass-accent);
-  border: 1px solid var(--glass-border-purple);
-  color: var(--text-secondary);
-  padding: 0.875rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  color: #e0e0e0;
+  padding: 0.75rem;
   border-radius: 6px;
-  font-size: 0.85rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
-  backdrop-filter: var(--blur-light);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-neural);
-  
-  &:hover {
-    border-color: var(--electric-purple);
-    background: rgba(139, 92, 246, 0.1);
-    box-shadow: var(--shadow-glow-purple);
-  }
+  font-size: 0.9rem;
   
   &:focus {
-    border-color: var(--electric-blue);
-    box-shadow: var(--shadow-glow-blue);
-    background: rgba(0, 217, 255, 0.08);
+    outline: none;
+    border-color: #00ffaa;
+    box-shadow: 0 0 0 2px rgba(0, 255, 170, 0.2);
   }
   
   option {
-    background: var(--console-dark);
-    color: var(--text-secondary);
-    padding: 0.5rem;
-    font-family: 'JetBrains Mono', monospace;
+    background: #1a1a2e;
+    color: #e0e0e0;
   }
 `;
 
 const Input = styled.input`
-  background: var(--glass-secondary);
-  border: 1px solid var(--glass-border-blue);
-  color: var(--text-primary);
-  padding: 0.875rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  color: #e0e0e0;
+  padding: 0.75rem;
   border-radius: 6px;
-  font-size: 0.85rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
-  backdrop-filter: var(--blur-light);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-data);
-  
-  &:hover {
-    border-color: var(--electric-blue);
-    background: rgba(0, 217, 255, 0.08);
-    box-shadow: var(--shadow-glow-blue);
-  }
+  font-size: 0.9rem;
   
   &:focus {
-    border-color: var(--data-green);
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-    background: rgba(0, 255, 136, 0.06);
+    outline: none;
+    border-color: #00ffaa;
+    box-shadow: 0 0 0 2px rgba(0, 255, 170, 0.2);
   }
   
   &::placeholder {
-    color: var(--muted-gray);
-    font-style: italic;
-    font-weight: 400;
+    color: #666;
   }
 `;
 
 const SearchButton = styled.button`
-  background: linear-gradient(135deg, var(--data-green), var(--electric-blue));
-  border: 1px solid var(--data-green);
-  color: var(--terminal-black);
-  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, #00ffaa, #00ccff);
+  border: none;
+  color: #000;
+  padding: 0.75rem 2rem;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 0.875rem;
-  font-family: 'Space Grotesk', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-data);
-  position: relative;
-  overflow: hidden;
-  
-  /* Execute indicator */
-  &::after {
-    content: 'EXECUTE';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
   
   &:hover {
-    background: linear-gradient(135deg, var(--electric-purple), var(--neural-pink));
-    border-color: var(--electric-purple);
-    color: var(--text-primary);
-    transform: translateY(-3px);
-    box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
-    
-    &::after {
-      opacity: 1;
-    }
-  }
-  
-  &:active {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-neural);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 255, 170, 0.3);
   }
   
   &:disabled {
-    opacity: 0.4;
+    opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: var(--shadow-neural);
-    
-    &::after {
-      opacity: 0;
-    }
   }
 `;
 
 const ResultsSection = styled.section`
-  background: var(--glass-bg);
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
-  border-radius: 16px;
+  background: rgba(15, 15, 35, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
   padding: 2rem;
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-lg);
-  position: relative;
-  
-  /* Subtle inner highlight */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.01) 0%, 
-      transparent 50%, 
-      rgba(16, 185, 129, 0.01) 100%
-    );
-    border-radius: 16px;
-    pointer-events: none;
-  }
+  border: 1px solid rgba(0, 255, 170, 0.2);
 `;
 
 const ResultsHeader = styled.div`
@@ -424,109 +183,34 @@ const ResultsInfo = styled.div`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  min-width: 3280px;
-  font-size: 0.8rem;
-  table-layout: fixed;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--glass-border);
+  min-width: 2500px;
+  font-size: 0.85rem;
 `;
 
 const Th = styled.th`
-  background: var(--glass-bg-strong);
-  padding: 0.75rem 0.5rem;
+  background: rgba(0, 136, 204, 0.1);
+  padding: 0.5rem;
   text-align: left;
-  font-weight: 600;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--glass-border);
-  border-right: 1px solid var(--glass-border);
-  font-size: 0.75rem;
+  font-weight: bold;
+  color: #00ccff;
+  border-bottom: 1px solid rgba(0, 204, 255, 0.3);
+  font-size: 0.8rem;
   white-space: nowrap;
-  letter-spacing: 0.025em;
-  text-transform: uppercase;
-  backdrop-filter: var(--blur-sm);
-  
-  &:last-child {
-    border-right: none;
-  }
-  
-  &:nth-child(1) { width: 120px; } /* CNPJ */
-  &:nth-child(2) { width: 200px; } /* Razão Social */
-  &:nth-child(3) { width: 150px; } /* Nome Fantasia */
-  &:nth-child(4) { width: 80px; } /* Matriz/Filial */
-  &:nth-child(5) { width: 250px; } /* Endereço */
-  &:nth-child(6) { width: 50px; } /* UF */
-  &:nth-child(7) { width: 120px; } /* Município */
-  &:nth-child(8) { width: 80px; } /* CEP */
-  &:nth-child(9) { width: 120px; } /* Telefones */
-  &:nth-child(10) { width: 150px; } /* Email */
-  &:nth-child(11) { width: 80px; } /* Situação */
-  &:nth-child(12) { width: 90px; } /* Data Situação */
-  &:nth-child(13) { width: 80px; } /* CNAE Principal */
-  &:nth-child(14) { width: 180px; } /* Descrição CNAE */
-  &:nth-child(15) { width: 150px; } /* CNAE Secundária */
-  &:nth-child(16) { width: 90px; } /* Data Início */
-  &:nth-child(17) { width: 150px; } /* Natureza Jurídica */
-  &:nth-child(18) { width: 100px; } /* Porte */
-  &:nth-child(19) { width: 100px; } /* Capital Social */
-  &:nth-child(20) { width: 100px; } /* Simples Nacional */
-  &:nth-child(21) { width: 100px; } /* MEI */
-  &:nth-child(22) { width: 320px; } /* Sócios */
-  &:nth-child(23) { width: 280px; } /* Representantes */
 `;
 
 const Td = styled.td`
-  padding: 0.75rem 0.5rem;
-  border-bottom: 1px solid var(--glass-border);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  color: var(--text-secondary);
+  padding: 0.5rem;
+  border-bottom: 1px solid rgba(0, 255, 170, 0.1);
+  color: #e0e0e0;
   font-size: 0.8rem;
   vertical-align: top;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  &:last-child {
-    border-right: none;
-  }
-  
-  &:nth-child(1) { width: 120px; } /* CNPJ */
-  &:nth-child(2) { width: 200px; } /* Razão Social */
-  &:nth-child(3) { width: 150px; } /* Nome Fantasia */
-  &:nth-child(4) { width: 80px; } /* Matriz/Filial */
-  &:nth-child(5) { width: 250px; } /* Endereço */
-  &:nth-child(6) { width: 50px; } /* UF */
-  &:nth-child(7) { width: 120px; } /* Município */
-  &:nth-child(8) { width: 80px; } /* CEP */
-  &:nth-child(9) { width: 120px; } /* Telefones */
-  &:nth-child(10) { width: 150px; } /* Email */
-  &:nth-child(11) { width: 80px; } /* Situação */
-  &:nth-child(12) { width: 90px; } /* Data Situação */
-  &:nth-child(13) { width: 80px; } /* CNAE Principal */
-  &:nth-child(14) { width: 180px; } /* Descrição CNAE */
-  &:nth-child(15) { width: 150px; } /* CNAE Secundária */
-  &:nth-child(16) { width: 90px; } /* Data Início */
-  &:nth-child(17) { width: 150px; } /* Natureza Jurídica */
-  &:nth-child(18) { width: 100px; } /* Porte */
-  &:nth-child(19) { width: 100px; } /* Capital Social */
-  &:nth-child(20) { width: 100px; } /* Simples Nacional */
-  &:nth-child(21) { width: 100px; } /* MEI */
-  &:nth-child(22) { width: 320px; } /* Sócios */
-  &:nth-child(23) { width: 280px; } /* Representantes */
 `;
 
 const Tr = styled.tr`
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  &:nth-child(even) {
-    background: rgba(255, 255, 255, 0.015);
-  }
+  transition: all 0.3s ease;
   
   &:hover {
-    background: rgba(0, 102, 204, 0.08);
-    transform: scale(1.001);
+    background: rgba(0, 255, 170, 0.05);
   }
 `;
 
@@ -604,42 +288,27 @@ const ProgressTitle = styled.h3`
 
 const ProgressBarContainer = styled.div`
   width: 100%;
-  height: 8px;
-  background: var(--glass-bg);
-  border-radius: 6px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
   overflow: hidden;
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(0, 255, 170, 0.2);
   margin-bottom: 1rem;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 `;
 
 const ProgressBar = styled.div`
   height: 100%;
-  background: linear-gradient(90deg, var(--primary-blue), var(--accent-green));
-  border-radius: 6px;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
+  background: linear-gradient(90deg, #00ffaa, #00ccff);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
   width: ${props => props.width}%;
-  position: relative;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    border-radius: 6px;
-  }
 `;
 
 const ProgressText = styled.div`
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.025em;
+  color: #e0e0e0;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
 `;
 
 const ProgressSubtext = styled.div`
@@ -1216,10 +885,10 @@ const Dashboard = () => {
                       <Td>{empresa.situacaoDescricao || '-'}</Td>
                       <Td>{empresa.dataSituacao || '-'}</Td>
                       <Td>{empresa.cnaePrincipal || '-'}</Td>
-                      <Td>{empresa.cnaeDescricao || '-'}</Td>
-                      <Td>{empresa.cnaeSecundaria || '-'}</Td>
+                      <Td style={{maxWidth: '200px', fontSize: '0.8rem'}}>{empresa.cnaeDescricao || '-'}</Td>
+                      <Td style={{maxWidth: '150px', fontSize: '0.8rem'}}>{empresa.cnaeSecundaria || '-'}</Td>
                       <Td>{empresa.dataInicioAtividades || '-'}</Td>
-                      <Td>{empresa.naturezaJuridicaDescricao || '-'}</Td>
+                      <Td style={{maxWidth: '150px', fontSize: '0.8rem'}}>{empresa.naturezaJuridicaDescricao || '-'}</Td>
                       <Td>{empresa.porteDescricao || '-'}</Td>
                       <Td>{formatCapitalSocial(empresa.capitalSocial)}</Td>
                       <Td>
@@ -1230,7 +899,7 @@ const Dashboard = () => {
                         {empresa.opcaoMei === 'S' ? '✅ Sim' : empresa.opcaoMei === 'N' ? '❌ Não' : '-'}
                         {empresa.dataOpcaoMei && <div style={{fontSize: '0.7rem'}}>Desde: {empresa.dataOpcaoMei}</div>}
                       </Td>
-                      <Td>
+                      <Td style={{maxWidth: '250px'}}>
                         {empresa.socios && empresa.socios.length > 0 ? (
                           <div>
                             <div 
@@ -1254,20 +923,13 @@ const Dashboard = () => {
                               </div>
                             </div>
                             {expandedSocios[index] && (
-                              <div style={{marginLeft: '20px', maxHeight: '200px', overflowY: 'auto'}}>
+                              <div style={{marginLeft: '20px'}}>
                                 {empresa.socios.map((socio, socioIndex) => (
-                                  <div key={socioIndex} style={{
-                                    marginBottom: '8px', 
-                                    fontSize: '0.75rem', 
-                                    borderBottom: '1px solid rgba(0,255,170,0.1)', 
-                                    paddingBottom: '6px',
-                                    wordBreak: 'break-word',
-                                    lineHeight: '1.3'
-                                  }}>
+                                  <div key={socioIndex} style={{marginBottom: '6px', fontSize: '0.8rem', borderBottom: '1px solid rgba(0,255,170,0.1)', paddingBottom: '4px'}}>
                                     <div><strong style={{color: '#00ffaa'}}>{socio.nome}</strong></div>
-                                    <div style={{color: '#ccc', marginTop: '2px'}}>{socio.qualificacao_descricao}</div>
-                                    <div style={{color: '#999', marginTop: '1px'}}>CPF: {socio.cpf_cnpj}</div>
-                                    <div style={{color: '#999', marginTop: '1px'}}>Desde: {socio.data_entrada}</div>
+                                    <div>{socio.qualificacao_descricao}</div>
+                                    <div>CPF: {socio.cpf_cnpj}</div>
+                                    <div>Desde: {socio.data_entrada}</div>
                                   </div>
                                 ))}
                               </div>
@@ -1277,7 +939,7 @@ const Dashboard = () => {
                           <div style={{color: '#666'}}>Sem dados</div>
                         )}
                       </Td>
-                      <Td>
+                      <Td style={{maxWidth: '200px'}}>
                         {empresa.socios && empresa.socios.some(s => s.representante_legal_nome) ? (
                           <div>
                             {(() => {
@@ -1305,19 +967,12 @@ const Dashboard = () => {
                                     </div>
                                   </div>
                                   {expandedRepresentantes[index] && (
-                                    <div style={{marginLeft: '20px', maxHeight: '200px', overflowY: 'auto'}}>
+                                    <div style={{marginLeft: '20px'}}>
                                       {representantes.map((socio, repIndex) => (
-                                        <div key={repIndex} style={{
-                                          marginBottom: '8px', 
-                                          fontSize: '0.75rem', 
-                                          borderBottom: '1px solid rgba(255,170,0,0.1)', 
-                                          paddingBottom: '6px',
-                                          wordBreak: 'break-word',
-                                          lineHeight: '1.3'
-                                        }}>
+                                        <div key={repIndex} style={{marginBottom: '6px', fontSize: '0.8rem', borderBottom: '1px solid rgba(255,170,0,0.1)', paddingBottom: '4px'}}>
                                           <div><strong style={{color: '#ffaa00'}}>{socio.representante_legal_nome}</strong></div>
-                                          <div style={{color: '#ccc', marginTop: '2px'}}>{socio.representante_legal_qualificacao_descricao}</div>
-                                          <div style={{color: '#999', marginTop: '1px'}}>CPF: {socio.representante_legal_cpf}</div>
+                                          <div>{socio.representante_legal_qualificacao_descricao}</div>
+                                          <div>CPF: {socio.representante_legal_cpf}</div>
                                         </div>
                                       ))}
                                     </div>
