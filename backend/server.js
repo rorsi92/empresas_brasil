@@ -15,6 +15,80 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json());
 
+// Endpoint temporário para verificar tabelas
+app.get('/api/check-tables', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+      ORDER BY table_name
+    `);
+    res.json({
+      success: true,
+      tables: result.rows.map(row => row.table_name)
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Debug endpoint to check filter data
+app.get('/api/debug-filters', async (req, res) => {
+  try {
+    let results = {};
+    
+    // Check motivo table
+    try {
+      const motivoResult = await pool.query('SELECT COUNT(*) as count FROM motivo');
+      const motivoSample = await pool.query('SELECT codigo, descricao FROM motivo LIMIT 5');
+      results.motivo = {
+        count: motivoResult.rows[0].count,
+        sample: motivoSample.rows
+      };
+    } catch (error) {
+      results.motivo = { error: error.message };
+    }
+    
+    // Check qualificacao_socio table
+    try {
+      const qualResult = await pool.query('SELECT COUNT(*) as count FROM qualificacao_socio');
+      const qualSample = await pool.query('SELECT codigo, descricao FROM qualificacao_socio LIMIT 5');
+      results.qualificacao_socio = {
+        count: qualResult.rows[0].count,
+        sample: qualSample.rows
+      };
+    } catch (error) {
+      results.qualificacao_socio = { error: error.message };
+    }
+    
+    // Check natureza_juridica table
+    try {
+      const natResult = await pool.query('SELECT COUNT(*) as count FROM natureza_juridica');
+      const natSample = await pool.query('SELECT codigo, descricao FROM natureza_juridica LIMIT 5');
+      results.natureza_juridica = {
+        count: natResult.rows[0].count,
+        sample: natSample.rows
+      };
+    } catch (error) {
+      results.natureza_juridica = { error: error.message };
+    }
+    
+    res.json({
+      success: true,
+      data: results
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 async function initDB() {
   try {
     await pool.query(`
@@ -69,6 +143,84 @@ app.post('/api/auth/login', async (req, res) => {
 
 // BUSINESS SEGMENTS BASED ON REAL CNAE DATA
 app.get('/api/filters/options', async (req, res) => {
+  try {
+    // Buscar motivos de situação cadastral da tabela 'motivo'
+    let motivoSituacaoResult;
+    try {
+      motivoSituacaoResult = await pool.query(`
+        SELECT codigo as code, descricao as description 
+        FROM motivo 
+        ORDER BY codigo
+      `);
+    } catch (error) {
+      console.log('Using static motivo data due to:', error.message);
+      motivoSituacaoResult = {
+        rows: [
+          {code: "00", description: "Sem Restrição"},
+          {code: "01", description: "Extinção por Encerramento Liquidação Voluntária"},
+          {code: "02", description: "Incorporação"},
+          {code: "03", description: "Fusão"},
+          {code: "04", description: "Cisão Total"},
+          {code: "05", description: "Extinção de Filial"},
+          {code: "06", description: "Caducidade"},
+          {code: "07", description: "Falta de Pluralidade de Sócios"},
+          {code: "08", description: "Omissa em Declarações"},
+          {code: "09", description: "Falência"},
+          {code: "10", description: "Concordata"},
+          {code: "11", description: "Liquidação Judicial"},
+          {code: "12", description: "Liquidação Extrajudicial"}
+        ]
+      };
+    }
+
+    // Buscar qualificações de sócio da tabela 'qualificacao_socio'
+    let qualificacaoSocioResult;
+    try {
+      qualificacaoSocioResult = await pool.query(`
+        SELECT codigo as code, descricao as description 
+        FROM qualificacao_socio 
+        ORDER BY codigo
+      `);
+    } catch (error) {
+      console.log('Using static qualificacao_socio data due to:', error.message);
+      qualificacaoSocioResult = {
+        rows: [
+          {code: "05", description: "Administrador"},
+          {code: "08", description: "Conselheiro de Administração"},
+          {code: "10", description: "Diretor"},
+          {code: "16", description: "Presidente"},
+          {code: "17", description: "Procurador"},
+          {code: "22", description: "Sócio"},
+          {code: "49", description: "Sócio-Administrador"},
+          {code: "54", description: "Fundador"},
+          {code: "65", description: "Titular Pessoa Física"}
+        ]
+      };
+    }
+
+    // Buscar naturezas jurídicas da tabela 'natureza_juridica'
+    let naturezaJuridicaResult;
+    try {
+      naturezaJuridicaResult = await pool.query(`
+        SELECT codigo as code, descricao as description 
+        FROM natureza_juridica 
+        ORDER BY codigo
+      `);
+    } catch (error) {
+      console.log('Using static natureza_juridica data due to:', error.message);
+      naturezaJuridicaResult = {
+        rows: [
+          {code: "1015", description: "Empresa Individual de Responsabilidade Limitada"},
+          {code: "2135", description: "Sociedade Limitada"},
+          {code: "2062", description: "Sociedade Empresária Limitada"},
+          {code: "2240", description: "Sociedade Simples Limitada"},
+          {code: "1244", description: "Empresário Individual"},
+          {code: "2054", description: "Sociedade Anônima Aberta"},
+          {code: "2070", description: "Sociedade Anônima Fechada"}
+        ]
+      };
+    }
+
   const businessSegments = [
     {
       id: 1, 
@@ -287,10 +439,52 @@ app.get('/api/filters/options', async (req, res) => {
     {code: "04", description: "Inapta"}
   ];
 
+  const motivoSituacao = motivoSituacaoResult.rows;
+  const qualificacaoSocio = qualificacaoSocioResult.rows;
+  const naturezaJuridica = naturezaJuridicaResult.rows;
+
+  // Filter out any filter categories that have only 1 or 0 options
+  // Since single-option dropdowns are not useful for filtering
+  const filterData = {
+    businessSegments, 
+    ufs, 
+    situacaoCadastral
+  };
+
+  // Only include filters that have more than 1 option
+  if (motivoSituacao && motivoSituacao.length > 1) {
+    filterData.motivoSituacao = motivoSituacao;
+  }
+  
+  if (qualificacaoSocio && qualificacaoSocio.length > 1) {
+    filterData.qualificacaoSocio = qualificacaoSocio;
+  }
+  
+  if (naturezaJuridica && naturezaJuridica.length > 1) {
+    filterData.naturezaJuridica = naturezaJuridica;
+  }
+
+  console.log('📊 Filter options count:', {
+    businessSegments: businessSegments.length,
+    ufs: ufs.length,
+    situacaoCadastral: situacaoCadastral.length,
+    motivoSituacao: motivoSituacao?.length || 0,
+    qualificacaoSocio: qualificacaoSocio?.length || 0,
+    naturezaJuridica: naturezaJuridica?.length || 0
+  });
+
   res.json({
     success: true,
-    data: { businessSegments, ufs, situacaoCadastral }
+    data: filterData
   });
+  
+  } catch (error) {
+    console.error('❌ Error loading filter options:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao carregar opções de filtros'
+    });
+  }
 });
 
 app.post('/api/companies/filtered', async (req, res) => {

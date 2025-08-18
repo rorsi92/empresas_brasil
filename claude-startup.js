@@ -60,7 +60,7 @@ function startBackend() {
         const projectRoot = process.cwd();
         const backendPath = path.join(projectRoot, 'backend');
         
-        backendProcess = spawn('node', ['server.js'], {
+        backendProcess = spawn('node', ['run-server.js'], {
             cwd: backendPath,
             stdio: ['ignore', 'pipe', 'pipe'],
             shell: true,
