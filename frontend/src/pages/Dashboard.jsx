@@ -316,6 +316,44 @@ const ProgressSubtext = styled.div`
   font-size: 0.9rem;
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(15, 15, 35, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 170, 0.2);
+`;
+
+const PageButton = styled.button`
+  background: ${props => props.active ? 'linear-gradient(135deg, #00ffaa, #00ccff)' : 'rgba(0, 255, 170, 0.1)'};
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  color: ${props => props.active ? '#000' : '#00ffaa'};
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: ${props => props.active ? 'bold' : '500'};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${props => props.active ? 'linear-gradient(135deg, #00ffaa, #00ccff)' : 'rgba(0, 255, 170, 0.2)'};
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+`;
+
+const PageInfo = styled.div`
+  color: #e0e0e0;
+  font-size: 0.9rem;
+`;
+
 const Dashboard = () => {
   const { user, logout } = useAuth();
   
@@ -343,6 +381,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [expandedSocios, setExpandedSocios] = useState({});
   const [filterOptions, setFilterOptions] = useState({
     businessSegments: [],
     ufs: [],
@@ -388,12 +429,23 @@ const Dashboard = () => {
 
     setLoading(true);
     setEmpresas([]);
+    let progressInterval = null;
     
-    // Simple progress bar for large queries
+    // Progress bar for large queries
     if (companyLimit >= 10000) {
       setShowProgress(true);
-      setProgress(10);
+      setProgress(5);
       toast.info(`Buscando ${companyLimit.toLocaleString()} empresas...`);
+
+      // Simulate realistic progress
+      progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 85) {
+            return Math.min(prev + 1, 95);
+          }
+          return Math.min(prev + Math.random() * 10 + 2, 85);
+        });
+      }, 800);
     }
 
     try {
@@ -403,34 +455,81 @@ const Dashboard = () => {
         page
       };
 
+      // Timeout customizado para consultas grandes
+      const timeoutMs = companyLimit >= 25000 ? 180000 : 120000; // 3min para 25k+, 2min para outros
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      
       const response = await fetch('/api/companies/filtered', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(searchData)
+        body: JSON.stringify(searchData),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       const data = await response.json();
       
-      if (data.success) {
+      // Clear progress interval FIRST
+      if (progressInterval) {
+        clearInterval(progressInterval);
         setProgress(100);
-        setEmpresas(data.data);
-        toast.success(`${data.data.length} empresas encontradas`);
+      }
+      
+      if (data.success) {
         
-        // Hide progress bar
+        if (page === 1) {
+          setEmpresas(data.data);
+        } else {
+          setEmpresas(prev => [...prev, ...data.data]);
+        }
+        
+        setCurrentPage(page);
+        setTotalPages(Math.ceil(companyLimit / 1000));
+        
+        console.log('📊 Dados recebidos:', {
+          empresasCount: data.data.length,
+          currentPage: page,
+          totalPages: Math.ceil(companyLimit / 1000)
+        });
+        
+        if (page === 1) {
+          toast.success(`✅ Página ${page}/${Math.ceil(companyLimit / 1000)} carregada - ${data.data.length} empresas`);
+        } else {
+          toast.success(`✅ Página ${page} carregada - ${data.data.length} empresas`);
+        }
+        
+        // Hide progress bar after showing success
         setTimeout(() => {
           setShowProgress(false);
           setProgress(0);
-        }, 800);
+        }, 2000);
       } else {
+        console.error('API Error:', data);
         toast.error(data.message || 'Erro na busca');
+        if (progressInterval) {
+          clearInterval(progressInterval);
+        }
         setShowProgress(false);
         setProgress(0);
       }
     } catch (error) {
       console.error('Search error:', error);
-      toast.error('Erro na busca');
+      
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+      
+      if (error.name === 'AbortError') {
+        toast.error(`Consulta cancelada - limite de tempo excedido (${companyLimit >= 25000 ? '3' : '2'} minutos). Tente filtros mais específicos.`);
+      } else {
+        toast.error('Erro na busca: ' + (error.message || 'Erro desconhecido'));
+      }
+      
       setShowProgress(false);
       setProgress(0);
     } finally {
@@ -442,6 +541,22 @@ const Dashboard = () => {
     if (!cnpj) return '';
     const cleaned = cnpj.replace(/\D/g, '');
     return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  };
+
+  const toggleSocios = (empresaIndex) => {
+    setExpandedSocios(prev => ({
+      ...prev,
+      [empresaIndex]: !prev[empresaIndex]
+    }));
+  };
+
+  const [expandedRepresentantes, setExpandedRepresentantes] = useState({});
+  
+  const toggleRepresentantes = (empresaIndex) => {
+    setExpandedRepresentantes(prev => ({
+      ...prev,
+      [empresaIndex]: !prev[empresaIndex]
+    }));
   };
 
   const formatCapitalSocial = (valor) => {
@@ -679,7 +794,11 @@ const Dashboard = () => {
             </FormGroup>
           </FiltersGrid>
 
-          <SearchButton onClick={() => handleSearch(1)} disabled={loading}>
+          <SearchButton onClick={() => {
+            setCurrentPage(1);
+            setEmpresas([]);
+            handleSearch(1);
+          }} disabled={loading}>
             {loading ? 'Buscando...' : 'Buscar Empresas'}
           </SearchButton>
         </SearchSection>
@@ -706,7 +825,10 @@ const Dashboard = () => {
           <ResultsSection>
             <ResultsHeader>
               <ResultsTitle>Resultados da Busca</ResultsTitle>
-              <ResultsInfo>{empresas.length} empresas encontradas</ResultsInfo>
+              <ResultsInfo>
+                {empresas.length} empresas encontradas 
+                {totalPages > 1 && `(Página ${currentPage}/${totalPages})`}
+              </ResultsInfo>
             </ResultsHeader>
 
             <div style={{ overflowX: 'auto' }}>
@@ -780,14 +902,38 @@ const Dashboard = () => {
                       <Td style={{maxWidth: '250px'}}>
                         {empresa.socios && empresa.socios.length > 0 ? (
                           <div>
-                            {empresa.socios.map((socio, socioIndex) => (
-                              <div key={socioIndex} style={{marginBottom: '6px', fontSize: '0.8rem', borderBottom: '1px solid rgba(0,255,170,0.1)', paddingBottom: '4px'}}>
-                                <div><strong style={{color: '#00ffaa'}}>{socio.nome}</strong></div>
-                                <div>{socio.qualificacao_descricao}</div>
-                                <div>CPF: {socio.cpf_cnpj}</div>
-                                <div>Desde: {socio.data_entrada}</div>
+                            <div 
+                              style={{
+                                cursor: 'pointer', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '8px',
+                                marginBottom: expandedSocios[index] ? '8px' : '0'
+                              }}
+                              onClick={() => toggleSocios(index)}
+                            >
+                              <span style={{fontSize: '12px', color: '#00ffaa'}}>
+                                {expandedSocios[index] ? '▼' : '▶'}
+                              </span>
+                              <div style={{fontSize: '0.8rem'}}>
+                                <div><strong style={{color: '#00ffaa'}}>{empresa.socios[0].nome}</strong></div>
+                                <div style={{fontSize: '0.7rem', color: '#999'}}>
+                                  {empresa.socios.length > 1 && `+${empresa.socios.length - 1} sócio${empresa.socios.length > 2 ? 's' : ''}`}
+                                </div>
                               </div>
-                            ))}
+                            </div>
+                            {expandedSocios[index] && (
+                              <div style={{marginLeft: '20px'}}>
+                                {empresa.socios.map((socio, socioIndex) => (
+                                  <div key={socioIndex} style={{marginBottom: '6px', fontSize: '0.8rem', borderBottom: '1px solid rgba(0,255,170,0.1)', paddingBottom: '4px'}}>
+                                    <div><strong style={{color: '#00ffaa'}}>{socio.nome}</strong></div>
+                                    <div>{socio.qualificacao_descricao}</div>
+                                    <div>CPF: {socio.cpf_cnpj}</div>
+                                    <div>Desde: {socio.data_entrada}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <div style={{color: '#666'}}>Sem dados</div>
@@ -796,13 +942,44 @@ const Dashboard = () => {
                       <Td style={{maxWidth: '200px'}}>
                         {empresa.socios && empresa.socios.some(s => s.representante_legal_nome) ? (
                           <div>
-                            {empresa.socios.filter(s => s.representante_legal_nome).map((socio, repIndex) => (
-                              <div key={repIndex} style={{marginBottom: '6px', fontSize: '0.8rem', borderBottom: '1px solid rgba(255,170,0,0.1)', paddingBottom: '4px'}}>
-                                <div><strong style={{color: '#ffaa00'}}>{socio.representante_legal_nome}</strong></div>
-                                <div>{socio.representante_legal_qualificacao_descricao}</div>
-                                <div>CPF: {socio.representante_legal_cpf}</div>
-                              </div>
-                            ))}
+                            {(() => {
+                              const representantes = empresa.socios.filter(s => s.representante_legal_nome);
+                              return (
+                                <>
+                                  <div 
+                                    style={{
+                                      cursor: 'pointer', 
+                                      display: 'flex', 
+                                      alignItems: 'center', 
+                                      gap: '8px',
+                                      marginBottom: expandedRepresentantes[index] ? '8px' : '0'
+                                    }}
+                                    onClick={() => toggleRepresentantes(index)}
+                                  >
+                                    <span style={{fontSize: '12px', color: '#ffaa00'}}>
+                                      {expandedRepresentantes[index] ? '▼' : '▶'}
+                                    </span>
+                                    <div style={{fontSize: '0.8rem'}}>
+                                      <div><strong style={{color: '#ffaa00'}}>{representantes[0].representante_legal_nome}</strong></div>
+                                      <div style={{fontSize: '0.7rem', color: '#999'}}>
+                                        {representantes.length > 1 && `+${representantes.length - 1} rep.`}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {expandedRepresentantes[index] && (
+                                    <div style={{marginLeft: '20px'}}>
+                                      {representantes.map((socio, repIndex) => (
+                                        <div key={repIndex} style={{marginBottom: '6px', fontSize: '0.8rem', borderBottom: '1px solid rgba(255,170,0,0.1)', paddingBottom: '4px'}}>
+                                          <div><strong style={{color: '#ffaa00'}}>{socio.representante_legal_nome}</strong></div>
+                                          <div>{socio.representante_legal_qualificacao_descricao}</div>
+                                          <div>CPF: {socio.representante_legal_cpf}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                         ) : (
                           <div style={{color: '#666'}}>Sem dados</div>
@@ -813,6 +990,28 @@ const Dashboard = () => {
                 </tbody>
               </Table>
             </div>
+
+            {totalPages > 1 && (
+              <PaginationContainer>
+                <PageButton
+                  onClick={() => handleSearch(currentPage - 1)}
+                  disabled={currentPage <= 1 || loading}
+                >
+                  ← Anterior
+                </PageButton>
+                
+                <PageInfo>
+                  Página {currentPage} de {totalPages}
+                </PageInfo>
+                
+                <PageButton
+                  onClick={() => handleSearch(currentPage + 1)}
+                  disabled={currentPage >= totalPages || loading}
+                >
+                  Próxima →
+                </PageButton>
+              </PaginationContainer>
+            )}
           </ResultsSection>
         )}
       </Content>

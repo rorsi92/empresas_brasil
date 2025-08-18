@@ -341,6 +341,66 @@ app.post('/api/companies/filtered', async (req, res) => {
       params.push(filters.situacaoCadastral);
     }
     
+    if (filters.segmentoNegocio) {
+      // Mapear segmento para CNAEs (usando dados do businessSegments)
+      const segmentId = parseInt(filters.segmentoNegocio);
+      const businessSegments = [
+        { id: 1, cnaes: ["4781400", "1412601", "4782201"] },
+        { id: 2, cnaes: ["5611203", "5611201", "5620104", "5612100"] },
+        { id: 3, cnaes: ["9602501", "9602502", "4772500"] },
+        { id: 4, cnaes: ["4530703", "4530705", "4541205"] },
+        { id: 5, cnaes: ["4511102", "4512901", "4520001"] },
+        { id: 6, cnaes: ["8630501", "8630503", "8640205"] }
+      ];
+      
+      const segment = businessSegments.find(s => s.id === segmentId);
+      if (segment) {
+        conditions.push(`est.cnae_fiscal = ANY($${params.length + 1})`);
+        params.push(segment.cnaes);
+      }
+    }
+    
+    if (filters.motivoSituacao) {
+      conditions.push(`est.motivo_situacao_cadastral = $${params.length + 1}`);
+      params.push(filters.motivoSituacao);
+    }
+    
+    if (filters.naturezaJuridica) {
+      conditions.push(`emp.natureza_juridica = $${params.length + 1}`);
+      params.push(filters.naturezaJuridica);
+    }
+    
+    if (filters.cnpj) {
+      conditions.push(`est.cnpj ILIKE $${params.length + 1}`);
+      params.push(`%${filters.cnpj}%`);
+    }
+    
+    if (filters.razaoSocial) {
+      conditions.push(`emp.razao_social ILIKE $${params.length + 1}`);
+      params.push(`%${filters.razaoSocial}%`);
+    }
+    
+    if (filters.matrizFilial && filters.matrizFilial !== '') {
+      conditions.push(`est.matriz_filial = $${params.length + 1}`);
+      params.push(filters.matrizFilial);
+    }
+    
+    if (filters.porteEmpresa) {
+      conditions.push(`emp.porte_empresa = $${params.length + 1}`);
+      params.push(filters.porteEmpresa);
+    }
+    
+    if (filters.capitalSocial) {
+      conditions.push(`emp.capital_social >= $${params.length + 1}`);
+      params.push(parseFloat(filters.capitalSocial));
+    }
+    
+    if (filters.temContato === 'sim') {
+      conditions.push(`(est.correio_eletronico IS NOT NULL AND est.correio_eletronico != '' OR est.telefone1 IS NOT NULL AND est.telefone1 != '')`);
+    } else if (filters.temContato === 'nao') {
+      conditions.push(`(est.correio_eletronico IS NULL OR est.correio_eletronico = '') AND (est.telefone1 IS NULL OR est.telefone1 = '')`);
+    }
+    
     if (conditions.length === 0) {
       return res.status(400).json({
         success: false,
@@ -349,7 +409,11 @@ app.post('/api/companies/filtered', async (req, res) => {
     }
     
     const whereClause = 'WHERE ' + conditions.join(' AND ');
-    const offset = (page - 1) * companyLimit;
+    
+    // Paginação SEMPRE 1000 empresas por página
+    const perPage = 1000;
+    const offset = (page - 1) * perPage;
+    const limitPerPage = perPage;
     
     // Complete query with all data including Simples Nacional
     const query = `
@@ -399,12 +463,16 @@ app.post('/api/companies/filtered', async (req, res) => {
       LEFT JOIN empresas emp ON est.cnpj_basico = emp.cnpj_basico
       LEFT JOIN simples ON est.cnpj_basico = simples.cnpj_basico
       ${whereClause}
-      ORDER BY est.cnpj_basico 
+      ORDER BY est.cnpj_basico
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
     `;
     
-    params.push(companyLimit, offset);
+    params.push(limitPerPage, offset);
     
+    console.log(`🔧 PAGINAÇÃO DEBUG:`);
+    console.log(`   Page: ${page}, CompanyLimit: ${companyLimit}, PerPage: ${perPage}`);
+    console.log(`   Offset: ${offset}, LimitPerPage: ${limitPerPage}`);
+    console.log(`   Query: LIMIT ${limitPerPage} OFFSET ${offset}`);
     console.log('Executing query...');
     const result = await pool.query(query, params);
     
@@ -548,10 +616,12 @@ app.post('/api/companies/filtered', async (req, res) => {
       data: companies,
       pagination: {
         currentPage: page,
-        totalCompanies,
-        totalPages: Math.ceil(totalCompanies / companyLimit),
-        companiesPerPage: companyLimit,
-        hasNextPage: page < Math.ceil(totalCompanies / companyLimit),
+        totalCompanies: Math.min(totalCompanies, companyLimit),
+        totalAvailable: totalCompanies,
+        totalPages: Math.ceil(Math.min(totalCompanies, companyLimit) / perPage),
+        companiesPerPage: perPage,
+        requestedLimit: companyLimit,
+        hasNextPage: (page * perPage) < Math.min(totalCompanies, companyLimit),
         hasPreviousPage: page > 1
       },
       performance: {
