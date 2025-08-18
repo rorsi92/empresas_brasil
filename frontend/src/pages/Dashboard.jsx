@@ -270,6 +270,52 @@ const CnaeItem = styled.div`
   }
 `;
 
+const ProgressContainer = styled.div`
+  background: rgba(15, 15, 35, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  text-align: center;
+`;
+
+const ProgressTitle = styled.h3`
+  color: #00ffaa;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+`;
+
+const ProgressBarContainer = styled.div`
+  width: 100%;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  margin-bottom: 1rem;
+`;
+
+const ProgressBar = styled.div`
+  height: 100%;
+  background: linear-gradient(90deg, #00ffaa, #00ccff);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
+  width: ${props => props.width}%;
+`;
+
+const ProgressText = styled.div`
+  color: #e0e0e0;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+`;
+
+const ProgressSubtext = styled.div`
+  color: #a0a0a0;
+  font-size: 0.9rem;
+`;
+
 const Dashboard = () => {
   const { user, logout } = useAuth();
   
@@ -295,6 +341,8 @@ const Dashboard = () => {
   
   const [empresas, setEmpresas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [showProgress, setShowProgress] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
     businessSegments: [],
     ufs: [],
@@ -329,6 +377,7 @@ const Dashboard = () => {
     }));
   };
 
+
   const handleSearch = async (page = 1) => {
     // Validate at least one filter is selected
     const hasFilter = Object.values(filters).some(value => value && value.trim() !== '');
@@ -338,6 +387,15 @@ const Dashboard = () => {
     }
 
     setLoading(true);
+    setEmpresas([]);
+    
+    // Simple progress bar for large queries
+    if (companyLimit >= 10000) {
+      setShowProgress(true);
+      setProgress(10);
+      toast.info(`Buscando ${companyLimit.toLocaleString()} empresas...`);
+    }
+
     try {
       const searchData = {
         ...filters,
@@ -356,14 +414,25 @@ const Dashboard = () => {
       const data = await response.json();
       
       if (data.success) {
+        setProgress(100);
         setEmpresas(data.data);
         toast.success(`${data.data.length} empresas encontradas`);
+        
+        // Hide progress bar
+        setTimeout(() => {
+          setShowProgress(false);
+          setProgress(0);
+        }, 800);
       } else {
         toast.error(data.message || 'Erro na busca');
+        setShowProgress(false);
+        setProgress(0);
       }
     } catch (error) {
       console.error('Search error:', error);
       toast.error('Erro na busca');
+      setShowProgress(false);
+      setProgress(0);
     } finally {
       setLoading(false);
     }
@@ -614,6 +683,24 @@ const Dashboard = () => {
             {loading ? 'Buscando...' : 'Buscar Empresas'}
           </SearchButton>
         </SearchSection>
+
+        {showProgress && (
+          <ProgressContainer>
+            <ProgressTitle>🔍 Processando Consulta</ProgressTitle>
+            <ProgressBarContainer>
+              <ProgressBar width={progress} />
+            </ProgressBarContainer>
+            <ProgressText>
+              {progress < 100 
+                ? `Processando... ${Math.round(progress)}%`
+                : 'Finalizando consulta...'
+              }
+            </ProgressText>
+            <ProgressSubtext>
+              Buscando {companyLimit.toLocaleString()} empresas na base de dados
+            </ProgressSubtext>
+          </ProgressContainer>
+        )}
 
         {empresas.length > 0 && (
           <ResultsSection>

@@ -17,7 +17,8 @@
       "Bash(cmd /c:*)",
       "Bash(git push:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   }

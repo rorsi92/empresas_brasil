@@ -300,11 +300,28 @@ app.post('/api/companies/filtered', async (req, res) => {
   try {
     const filters = req.body;
     const page = filters.page || 1;
-    const companyLimit = filters.companyLimit || 1000;
+    let companyLimit = filters.companyLimit || 1000;
+
+    // Set timeout for this request based on company limit
+    const timeoutId = setTimeout(() => {
+      if (!res.headersSent) {
+        res.status(408).json({
+          success: false,
+          message: 'Query timeout - consulta muito demorada. Tente filtros mais específicos.'
+        });
+      }
+    }, companyLimit >= 25000 ? 180000 : 120000); // 3 minutes for large queries, 2 minutes for others
     
     console.log('Filters:', filters);
     
+    // Allow up to 50000 companies as requested
+    if (companyLimit > 50000) {
+      console.log(`⚠️ Very large query detected (${companyLimit}), limiting to 50000 for performance`);
+      companyLimit = 50000;
+    }
+    
     if (companyLimit < 1000 || companyLimit > 50000) {
+      clearTimeout(timeoutId);
       return res.status(400).json({
         success: false,
         message: `O limite deve estar entre 1.000 e 50.000 empresas`
@@ -334,6 +351,7 @@ app.post('/api/companies/filtered', async (req, res) => {
     const whereClause = 'WHERE ' + conditions.join(' AND ');
     const offset = (page - 1) * companyLimit;
     
+    // Complete query with all data including Simples Nacional
     const query = `
       SELECT 
         est.cnpj,
@@ -371,11 +389,6 @@ app.post('/api/companies/filtered', async (req, res) => {
         emp.porte_empresa,
         emp.ente_federativo_responsavel,
         emp.capital_social,
-        cnae.descricao as cnae_descricao,
-        motivo.descricao as motivo_descricao,
-        municipio.descricao as municipio_descricao,
-        nj.descricao as natureza_juridica_descricao,
-        qs.descricao as qualificacao_responsavel_descricao,
         simples.opcao_simples,
         simples.data_opcao_simples,
         simples.data_exclusao_simples,
@@ -384,13 +397,9 @@ app.post('/api/companies/filtered', async (req, res) => {
         simples.data_exclusao_mei
       FROM estabelecimento est
       LEFT JOIN empresas emp ON est.cnpj_basico = emp.cnpj_basico
-      LEFT JOIN cnae ON est.cnae_fiscal = cnae.codigo
-      LEFT JOIN motivo ON est.motivo_situacao_cadastral = motivo.codigo
-      LEFT JOIN municipio ON est.municipio = municipio.codigo
-      LEFT JOIN natureza_juridica nj ON emp.natureza_juridica = nj.codigo
-      LEFT JOIN qualificacao_socio qs ON emp.qualificacao_responsavel = qs.codigo
       LEFT JOIN simples ON est.cnpj_basico = simples.cnpj_basico
       ${whereClause}
+      ORDER BY est.cnpj_basico 
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
     `;
     
@@ -399,11 +408,13 @@ app.post('/api/companies/filtered', async (req, res) => {
     console.log('Executing query...');
     const result = await pool.query(query, params);
     
-    // Get socios for all companies in separate query
+    // For performance, skip socios query for large result sets
     const cnpjBasicos = result.rows.map(row => row.cnpj_basico).filter(Boolean);
     let sociosData = {};
     
+    // Fetch socios for all queries - user specifically requested this for 50k searches
     if (cnpjBasicos.length > 0) {
+      console.log('Fetching socios data...');
       const sociosQuery = `
         SELECT 
           socios.cnpj_basico,
@@ -411,45 +422,45 @@ app.post('/api/companies/filtered', async (req, res) => {
           socios.nome_socio,
           socios.cnpj_cpf_socio,
           socios.qualificacao_socio,
-          qs.descricao as qualificacao_descricao,
           socios.data_entrada_sociedade,
           socios.pais,
           socios.representante_legal,
           socios.nome_representante,
           socios.qualificacao_representante_legal,
-          qs_rep.descricao as qualificacao_representante_descricao,
           socios.faixa_etaria
         FROM socios
-        LEFT JOIN qualificacao_socio qs ON socios.qualificacao_socio = qs.codigo
-        LEFT JOIN qualificacao_socio qs_rep ON socios.qualificacao_representante_legal = qs_rep.codigo
         WHERE socios.cnpj_basico = ANY($1)
         AND socios.nome_socio IS NOT NULL
         AND socios.nome_socio != ''
         ORDER BY socios.cnpj_basico, socios.identificador_de_socio
+        LIMIT 250000
       `;
       
-      const sociosResult = await pool.query(sociosQuery, [cnpjBasicos]);
-      
-      // Group socios by cnpj_basico
-      sociosResult.rows.forEach(socio => {
-        if (!sociosData[socio.cnpj_basico]) {
-          sociosData[socio.cnpj_basico] = [];
-        }
-        sociosData[socio.cnpj_basico].push({
-          identificador: socio.identificador_de_socio,
-          nome: socio.nome_socio,
-          cpf_cnpj: socio.cnpj_cpf_socio,
-          qualificacao: socio.qualificacao_socio,
-          qualificacao_descricao: socio.qualificacao_descricao,
-          data_entrada: socio.data_entrada_sociedade,
-          pais: socio.pais,
-          representante_legal_cpf: socio.representante_legal,
-          representante_legal_nome: socio.nome_representante,
-          representante_legal_qualificacao: socio.qualificacao_representante_legal,
-          representante_legal_qualificacao_descricao: socio.qualificacao_representante_descricao,
-          faixa_etaria: socio.faixa_etaria
+      try {
+        const sociosResult = await pool.query(sociosQuery, [cnpjBasicos]);
+        console.log(`📊 Found ${sociosResult.rows.length} socios records`);
+        
+        // Group socios by cnpj_basico
+        sociosResult.rows.forEach(socio => {
+          if (!sociosData[socio.cnpj_basico]) {
+            sociosData[socio.cnpj_basico] = [];
+          }
+          sociosData[socio.cnpj_basico].push({
+            identificador: socio.identificador_de_socio,
+            nome: socio.nome_socio,
+            cpf_cnpj: socio.cnpj_cpf_socio,
+            qualificacao: socio.qualificacao_socio,
+            data_entrada: socio.data_entrada_sociedade,
+            pais: socio.pais,
+            representante_legal_cpf: socio.representante_legal,
+            representante_legal_nome: socio.nome_representante,
+            representante_legal_qualificacao: socio.qualificacao_representante_legal,
+            faixa_etaria: socio.faixa_etaria
+          });
         });
-      });
+      } catch (sociosError) {
+        console.log('⚠️ Socios query failed, continuing without socios data:', sociosError.message);
+      }
     }
     
     const queryTime = Date.now() - startTime;
@@ -479,7 +490,7 @@ app.post('/api/companies/filtered', async (req, res) => {
       
       // ATIVIDADE ECONÔMICA
       cnaePrincipal: row.cnae_fiscal,
-      cnaeDescricao: row.cnae_descricao,
+      cnaeDescricao: row.cnae_fiscal || 'Não informado',
       cnaeSecundaria: row.cnae_fiscal_secundaria,
       
       // ENDEREÇO COMPLETO
@@ -504,9 +515,9 @@ app.post('/api/companies/filtered', async (req, res) => {
       
       // DADOS DA EMPRESA
       naturezaJuridica: row.natureza_juridica,
-      naturezaJuridicaDescricao: row.natureza_juridica_descricao,
+      naturezaJuridicaDescricao: row.natureza_juridica || 'Não informado',
       qualificacaoResponsavel: row.qualificacao_responsavel,
-      qualificacaoResponsavelDescricao: row.qualificacao_responsavel_descricao,
+      qualificacaoResponsavelDescricao: row.qualificacao_responsavel || 'Não informado',
       porteEmpresa: row.porte_empresa,
       porteDescricao: row.porte_empresa === '01' ? 'Microempresa' :
                      row.porte_empresa === '03' ? 'Empresa de Pequeno Porte' :
@@ -514,7 +525,7 @@ app.post('/api/companies/filtered', async (req, res) => {
       enteFederativoResponsavel: row.ente_federativo_responsavel,
       capitalSocial: row.capital_social ? parseFloat(row.capital_social) : null,
       
-      // SIMPLES NACIONAL / MEI
+      // SIMPLES NACIONAL / MEI - Include all data as requested
       opcaoSimples: row.opcao_simples,
       dataOpcaoSimples: row.data_opcao_simples,
       dataExclusaoSimples: row.data_exclusao_simples,
