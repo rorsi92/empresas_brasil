@@ -412,10 +412,20 @@ const Dashboard = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Format CNPJ automatically as user types
+    if (name === 'cnpj') {
+      const formattedCNPJ = formatCNPJ(value);
+      setFilters(prev => ({
+        ...prev,
+        [name]: formattedCNPJ
+      }));
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
 
@@ -449,8 +459,14 @@ const Dashboard = () => {
     }
 
     try {
+      // Clean CNPJ by removing formatting characters before sending to API
+      const cleanedFilters = { ...filters };
+      if (cleanedFilters.cnpj) {
+        cleanedFilters.cnpj = cleanedFilters.cnpj.replace(/\D/g, '');
+      }
+      
       const searchData = {
-        ...filters,
+        ...cleanedFilters,
         companyLimit,
         page
       };
@@ -691,7 +707,8 @@ const Dashboard = () => {
                 name="cnpj"
                 value={filters.cnpj}
                 onChange={handleInputChange}
-                placeholder="Digite o CNPJ"
+                placeholder="Digite o CNPJ (ex: 12.345.678/0001-90)"
+                maxLength={18}
               />
             </FormGroup>
 
@@ -847,13 +864,13 @@ const Dashboard = () => {
                     <Th>Email</Th>
                     <Th>Situação</Th>
                     <Th>Data Situação</Th>
-                    <Th>CNAE Principal</Th>
-                    <Th>Descrição CNAE</Th>
-                    <Th>CNAE Secundária</Th>
-                    <Th>Data Início</Th>
-                    <Th>Natureza Jurídica</Th>
-                    <Th>Porte</Th>
-                    <Th>Capital Social</Th>
+                    <Th style={{minWidth: '90px'}}>CNAE Principal</Th>
+                    <Th style={{minWidth: '220px'}}>Descrição CNAE</Th>
+                    <Th style={{minWidth: '180px'}}>CNAE Secundária</Th>
+                    <Th style={{minWidth: '90px'}}>Data Início</Th>
+                    <Th style={{minWidth: '180px'}}>Natureza Jurídica</Th>
+                    <Th style={{minWidth: '100px'}}>Porte</Th>
+                    <Th style={{minWidth: '120px'}}>Capital Social</Th>
                     <Th>Simples Nacional</Th>
                     <Th>MEI</Th>
                     <Th>Sócios/Diretores</Th>
@@ -884,13 +901,23 @@ const Dashboard = () => {
                       <Td>{empresa.email || '-'}</Td>
                       <Td>{empresa.situacaoDescricao || '-'}</Td>
                       <Td>{empresa.dataSituacao || '-'}</Td>
-                      <Td>{empresa.cnaePrincipal || '-'}</Td>
-                      <Td style={{maxWidth: '200px', fontSize: '0.8rem'}}>{empresa.cnaeDescricao || '-'}</Td>
-                      <Td style={{maxWidth: '150px', fontSize: '0.8rem'}}>{empresa.cnaeSecundaria || '-'}</Td>
-                      <Td>{empresa.dataInicioAtividades || '-'}</Td>
-                      <Td style={{maxWidth: '150px', fontSize: '0.8rem'}}>{empresa.naturezaJuridicaDescricao || '-'}</Td>
-                      <Td>{empresa.porteDescricao || '-'}</Td>
-                      <Td>{formatCapitalSocial(empresa.capitalSocial)}</Td>
+                      <Td style={{minWidth: '90px', fontSize: '0.8rem'}}>{empresa.cnaePrincipal || '-'}</Td>
+                      <Td style={{minWidth: '220px', maxWidth: '220px', fontSize: '0.8rem', wordWrap: 'break-word'}}>{empresa.cnaeDescricao || '-'}</Td>
+                      <Td style={{minWidth: '180px', maxWidth: '180px', fontSize: '0.8rem'}}>
+                        {empresa.cnaeSecundaria ? (
+                          <div>
+                            {empresa.cnaeSecundaria.split(',').map((cnae, idx) => (
+                              <div key={idx} style={{marginBottom: '2px', padding: '1px 4px', backgroundColor: 'rgba(0,255,170,0.1)', borderRadius: '3px', fontSize: '0.75rem'}}>
+                                {cnae.trim()}
+                              </div>
+                            ))}
+                          </div>
+                        ) : '-'}
+                      </Td>
+                      <Td style={{minWidth: '90px', fontSize: '0.8rem'}}>{empresa.dataInicioAtividades || '-'}</Td>
+                      <Td style={{minWidth: '180px', maxWidth: '180px', fontSize: '0.8rem', wordWrap: 'break-word'}}>{empresa.naturezaJuridicaDescricao || '-'}</Td>
+                      <Td style={{minWidth: '100px', fontSize: '0.8rem'}}>{empresa.porteDescricao || '-'}</Td>
+                      <Td style={{minWidth: '120px', fontSize: '0.8rem', textAlign: 'right'}}>{formatCapitalSocial(empresa.capitalSocial)}</Td>
                       <Td>
                         {empresa.opcaoSimples === 'S' ? '✅ Sim' : empresa.opcaoSimples === 'N' ? '❌ Não' : '-'}
                         {empresa.dataOpcaoSimples && <div style={{fontSize: '0.7rem'}}>Desde: {empresa.dataOpcaoSimples}</div>}

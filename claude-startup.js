@@ -44,11 +44,25 @@ async function killExistingProcesses() {
     const port4001InUse = await checkPort(4001);
     
     if (port6000InUse || port4001InUse) {
-        console.log('⚠️  Matando processos nas portas 6000 e 4001...');
+        console.log('⚠️  Liberando portas 6000 e 4001...');
         return new Promise((resolve) => {
-            exec('taskkill /f /im node.exe 2>nul', () => {
-                setTimeout(resolve, 2000);
-            });
+            let killCommands = [];
+            
+            if (port6000InUse) {
+                killCommands.push('for /f "tokens=5" %a in (\'netstat -ano ^| findstr :6000\') do taskkill /f /pid %a 2>nul');
+            }
+            if (port4001InUse) {
+                killCommands.push('for /f "tokens=5" %a in (\'netstat -ano ^| findstr :4001\') do taskkill /f /pid %a 2>nul');
+            }
+            
+            if (killCommands.length > 0) {
+                exec(killCommands.join(' && '), (error) => {
+                    // Ignore errors - ports might not be in use
+                    setTimeout(resolve, 2000);
+                });
+            } else {
+                resolve();
+            }
         });
     }
 }

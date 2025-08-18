@@ -514,12 +514,20 @@ app.post('/api/companies/filtered', async (req, res) => {
       companyLimit = 50000;
     }
     
-    if (companyLimit < 1000 || companyLimit > 50000) {
-      clearTimeout(timeoutId);
-      return res.status(400).json({
-        success: false,
-        message: `O limite deve estar entre 1.000 e 50.000 empresas`
-      });
+    // When searching by specific CNPJ, automatically set limit to 1
+    const isSpecificSearch = filters.cnpj && filters.cnpj.trim();
+    if (isSpecificSearch) {
+      companyLimit = 1;
+      console.log(`🎯 CNPJ search detected, setting limit to 1`);
+    } else {
+      // For general searches, enforce minimum of 1000
+      if (companyLimit < 1000 || companyLimit > 50000) {
+        clearTimeout(timeoutId);
+        return res.status(400).json({
+          success: false,
+          message: `O limite deve estar entre 1.000 e 50.000 empresas`
+        });
+      }
     }
     
     const conditions = [];
@@ -565,8 +573,9 @@ app.post('/api/companies/filtered', async (req, res) => {
     }
     
     if (filters.cnpj) {
-      conditions.push(`est.cnpj ILIKE $${params.length + 1}`);
-      params.push(`%${filters.cnpj}%`);
+      // For CNPJ searches, use exact match for much better performance
+      conditions.push(`est.cnpj = $${params.length + 1}`);
+      params.push(filters.cnpj);
     }
     
     if (filters.razaoSocial) {
