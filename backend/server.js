@@ -552,7 +552,7 @@ app.post('/api/companies/filtered', async (req, res) => {
         { id: 3, cnaes: ["9602501", "9602502", "4772500"] },
         { id: 4, cnaes: ["4530703", "4530705", "4541205"] },
         { id: 5, cnaes: ["4511102", "4512901", "4520001"] },
-        { id: 6, cnaes: ["8630501", "8630503", "8640205"] }
+        { id: 6, cnaes: ["4930201", "4930202", "5320202", "5229099"] }
       ];
       
       const segment = businessSegments.find(s => s.id === segmentId);
@@ -683,11 +683,16 @@ app.post('/api/companies/filtered', async (req, res) => {
     const cnpjBasicos = result.rows.map(row => row.cnpj_basico).filter(Boolean);
     let sociosData = {};
     
-    // Fetch socios for all queries - user specifically requested this for 50k searches
+    // Optimized socios fetch - limit per company for better performance on large queries
     if (cnpjBasicos.length > 0) {
-      console.log('Fetching socios data...');
+      console.log(`Fetching socios data for ${cnpjBasicos.length} companies...`);
+      const maxSociosPerCompany = companyLimit >= 25000 ? 3 : 5; // Fewer socios per company for large queries
+      const totalSociosLimit = Math.min(cnpjBasicos.length * maxSociosPerCompany, 150000); // Cap total socios
+      
+      console.log(`📊 Max ${maxSociosPerCompany} socios per company, total limit: ${totalSociosLimit}`);
+      
       const sociosQuery = `
-        SELECT 
+        SELECT DISTINCT ON (socios.cnpj_basico, socios.identificador_de_socio)
           socios.cnpj_basico,
           socios.identificador_de_socio,
           socios.nome_socio,
@@ -699,16 +704,20 @@ app.post('/api/companies/filtered', async (req, res) => {
           socios.nome_representante,
           socios.qualificacao_representante_legal,
           socios.faixa_etaria
-        FROM socios
-        WHERE socios.cnpj_basico = ANY($1)
-        AND socios.nome_socio IS NOT NULL
-        AND socios.nome_socio != ''
+        FROM (
+          SELECT *, ROW_NUMBER() OVER (PARTITION BY cnpj_basico ORDER BY identificador_de_socio) as rn
+          FROM socios
+          WHERE cnpj_basico = ANY($1)
+          AND nome_socio IS NOT NULL
+          AND nome_socio != ''
+        ) socios
+        WHERE rn <= $2
         ORDER BY socios.cnpj_basico, socios.identificador_de_socio
-        LIMIT 250000
+        LIMIT $3
       `;
       
       try {
-        const sociosResult = await pool.query(sociosQuery, [cnpjBasicos]);
+        const sociosResult = await pool.query(sociosQuery, [cnpjBasicos, maxSociosPerCompany, totalSociosLimit]);
         console.log(`📊 Found ${sociosResult.rows.length} socios records`);
         
         // Group socios by cnpj_basico

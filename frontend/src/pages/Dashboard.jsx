@@ -827,13 +827,18 @@ const Dashboard = () => {
               <ProgressBar width={progress} />
             </ProgressBarContainer>
             <ProgressText>
-              {progress < 100 
+              {progress < 95 
                 ? `Processando... ${Math.round(progress)}%`
+                : progress < 100
+                ? `Carregando sócios... ${Math.round(progress)}%`
                 : 'Finalizando consulta...'
               }
             </ProgressText>
             <ProgressSubtext>
-              Buscando {companyLimit.toLocaleString()} empresas na base de dados
+              {progress >= 95 && progress < 100 && companyLimit >= 25000
+                ? '⏳ Os últimos 5% podem levar até 1 minuto (carregando dados dos sócios)'
+                : `Buscando ${companyLimit.toLocaleString()} empresas na base de dados`
+              }
             </ProgressSubtext>
           </ProgressContainer>
         )}
