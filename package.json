@@ -1,0 +1,29 @@
+{
+  "name": "empresas-brasil-sistema",
+  "version": "1.0.0",
+  "description": "Sistema completo para consulta de empresas brasileiras",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "npm run install-backend && npm run install-frontend",
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "keywords": [
+    "empresas",
+    "brasil",
+    "cnpj",
+    "consulta",
+    "nodejs",
+    "react"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

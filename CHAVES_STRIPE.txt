@@ -1,0 +1,19 @@
+CHAVES DO STRIPE - COPIE E COLE AQUI:
+
+1. PUBLISHABLE KEY (pk_test_...):
+[COLE AQUI SUA CHAVE PUBLISHABLE]
+
+2. SECRET KEY (sk_test_...):
+[COLE AQUI SUA CHAVE SECRET]
+
+3. PRICE ID (após criar produto):
+[COLE AQUI O PRICE ID DO SEU PRODUTO]
+
+4. WEBHOOK SECRET (após criar webhook):
+[COLE AQUI O WEBHOOK SECRET]
+
+---
+INSTRUÇÕES:
+1. Pegue essas chaves no dashboard do Stripe
+2. Cole aqui neste arquivo
+3. Eu vou configurar automaticamente no sistema

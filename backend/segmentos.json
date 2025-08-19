@@ -1,0 +1,5 @@
+[
+  {"id": 1, "name": "Vestuário e Moda", "description": "Comércio varejista de roupas, acessórios e artigos de moda", "icon": "👗", "color": "#FF6B6B"},
+  {"id": 2, "name": "Restaurantes e Lanchonetes", "description": "Restaurantes, lanchonetes, casas de suco e estabelecimentos similares", "icon": "🍽️", "color": "#4ECDC4"},
+  {"id": 7, "name": "Transporte de Cargas", "description": "Transporte rodoviário de carga e serviços logísticos", "icon": "🚛", "color": "#F8C471"}
+]

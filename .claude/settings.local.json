@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(npm start)",
+      "Bash(npm run dev:*)",
+      "Bash(grep:*)",
+      "WebSearch",
+      "Bash(cp:*)",
+      "Bash(start-all.bat)",
+      "Bash(time curl:*)",
+      "Bash(timeout:*)",
+      "Bash(find:*)",
+      "Bash(cmd /c:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(taskkill:*)",
+      "Bash(git checkout efdae89 -- frontend/src/pages/Dashboard.jsx)",
+      "Bash(npm install:*)",
+      "Bash(touch:*)"
+    ],
+    "deny": []
+  }
+}
