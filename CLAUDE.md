@@ -162,3 +162,44 @@ curl -X POST http://localhost:6000/api/companies/filtered \
 1. **NUNCA alterar** mapeamento de CNAEs em server.js linhas 549-556
 2. **NUNCA alterar** query otimizada de sócios linhas 686-720
 3. **NUNCA alterar** lógica da barra de progresso Dashboard.jsx linhas 830-841
+
+---
+**🎯 FUNCIONALIDADE DE EXPORTAÇÃO IMPLEMENTADA v6.2 (19/08/2025)**
+
+#### ✅ Nova Funcionalidade Completa:
+- **EXPORTAÇÃO EXCEL**: Arquivo .xlsx nativo com biblioteca oficial XLSX
+- **EXPORTAÇÃO CSV**: Formato estruturado com separador ponto e vírgula
+- **32+ CAMPOS**: Todos os dados da empresa em colunas organizadas
+- **SÓCIOS DETALHADOS**: Cada sócio com 6 campos específicos
+
+#### 📊 Estrutura dos Dados Exportados:
+**Dados da Empresa (20 campos):**
+- CNPJ formatado, CNPJ Básico, Razão Social, Nome Fantasia
+- Matriz/Filial, Situação Cadastral, Datas, Motivos
+- CNAE Principal/Secundária, Natureza Jurídica, Porte, Capital Social
+- Endereço completo: Tipo, Logradouro, Número, Complemento, Bairro, CEP, UF, Município
+- Contatos: DDD1, Telefone1, DDD2, Telefone2, Email
+- Simples Nacional: Opção, Datas, MEI, Datas
+
+**Dados dos Sócios (6 campos por sócio):**
+- Nome, CPF/CNPJ, Qualificação, Data Entrada, Faixa Etária, País
+
+#### 🔧 Tecnologias e Implementação:
+- **Biblioteca XLSX**: `npm install xlsx` - Exportação Excel nativa
+- **Botões UI**: Integrados no ResultsHeader com design consistente
+- **Formatação**: Larguras automáticas de colunas no Excel
+- **Encoding**: UTF-8 com BOM para acentos corretos
+- **Separadores CSV**: Ponto e vírgula (;) para compatibilidade Excel brasileiro
+
+#### 📋 Localização do Código:
+- **Frontend imports**: Dashboard.jsx linha 6 (`import * as XLSX from 'xlsx'`)
+- **Styled components**: Dashboard.jsx linhas 183-218 (ExportButton, ExportButtonsContainer)
+- **Função exportToCSV**: Dashboard.jsx linhas 600-683
+- **Função exportToExcel**: Dashboard.jsx linhas 685-769
+- **Botões UI**: Dashboard.jsx linhas 966-973
+
+#### 🚨 REGRAS CRÍTICAS DE EXPORTAÇÃO:
+4. **NUNCA remover** biblioteca XLSX do package.json
+5. **NUNCA alterar** estrutura de dados das funções de exportação (linhas 600-769)
+6. **NUNCA alterar** botões no ResultsHeader (linhas 966-973)
+7. **NUNCA alterar** separador CSV (ponto e vírgula) - compatibilidade Excel
