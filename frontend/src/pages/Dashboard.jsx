@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import empresaService from '../services/empresaService';
+import * as XLSX from 'xlsx';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -178,6 +179,43 @@ const ResultsTitle = styled.h2`
 const ResultsInfo = styled.div`
   color: #a0a0a0;
   font-size: 0.9rem;
+`;
+
+const ExportButtonsContainer = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-left: 1rem;
+`;
+
+const ExportButton = styled.button`
+  background: linear-gradient(135deg, #00ffaa 0%, #00cc88 100%);
+  color: #000;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+
+  &:hover {
+    background: linear-gradient(135deg, #00cc88 0%, #00aa66 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 170, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
 `;
 
 const Table = styled.table`
@@ -559,6 +597,182 @@ const Dashboard = () => {
     return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
   };
 
+  const exportToCSV = () => {
+    if (empresas.length === 0) {
+      toast.error('Nenhum dado para exportar');
+      return;
+    }
+
+    // Find max number of socios to create appropriate columns
+    const maxSocios = Math.max(...empresas.map(empresa => empresa.socios?.length || 0));
+
+    // Prepare data with all columns separated
+    const csvData = empresas.map(empresa => {
+      const baseData = {
+        'CNPJ': formatCNPJ(empresa.cnpj) || '',
+        'CNPJ Básico': empresa.cnpjBasico || '',
+        'Razão Social': empresa.razaoSocial || '',
+        'Nome Fantasia': empresa.nomeFantasia || '',
+        'Matriz/Filial': empresa.matrizFilial || '',
+        'Situação Cadastral': empresa.situacaoDescricao || '',
+        'Data Situação': empresa.dataSituacao || '',
+        'Motivo Situação': empresa.motivoSituacao || '',
+        'Data Início Atividades': empresa.dataInicioAtividades || '',
+        'CNAE Principal': empresa.cnaePrincipal || '',
+        'CNAE Secundária': empresa.cnaeSecundaria || '',
+        'Natureza Jurídica': empresa.naturezaJuridica || '',
+        'Porte Empresa': empresa.porteEmpresa || '',
+        'Capital Social': empresa.capitalSocial || '',
+        'Tipo Logradouro': empresa.tipoLogradouro || '',
+        'Logradouro': empresa.logradouro || '',
+        'Número': empresa.numero || '',
+        'Complemento': empresa.complemento || '',
+        'Bairro': empresa.bairro || '',
+        'CEP': empresa.cep || '',
+        'UF': empresa.uf || '',
+        'Município': empresa.municipio || '',
+        'DDD 1': empresa.ddd1 || '',
+        'Telefone 1': empresa.telefone1 || '',
+        'DDD 2': empresa.ddd2 || '',
+        'Telefone 2': empresa.telefone2 || '',
+        'Email': empresa.email || '',
+        'Situação Especial': empresa.situacaoEspecial || '',
+        'Data Situação Especial': empresa.dataSituacaoEspecial || '',
+        'Opção Simples Nacional': empresa.opcaoSimples || '',
+        'Data Opção Simples': empresa.dataOpcaoSimples || '',
+        'Opção MEI': empresa.opcaoMei || '',
+        'Data Opção MEI': empresa.dataOpcaoMei || ''
+      };
+
+      // Add socios data in separate columns
+      const sociosData = {};
+      for (let i = 0; i < maxSocios; i++) {
+        const socio = empresa.socios?.[i];
+        sociosData[`Sócio ${i + 1} - Nome`] = socio?.nome || '';
+        sociosData[`Sócio ${i + 1} - CPF/CNPJ`] = socio?.cpf_cnpj || '';
+        sociosData[`Sócio ${i + 1} - Qualificação`] = socio?.qualificacao || '';
+        sociosData[`Sócio ${i + 1} - Data Entrada`] = socio?.data_entrada || '';
+        sociosData[`Sócio ${i + 1} - Faixa Etária`] = socio?.faixa_etaria || '';
+        sociosData[`Sócio ${i + 1} - País`] = socio?.pais || '';
+      }
+
+      return { ...baseData, ...sociosData };
+    });
+
+    // Convert to CSV format with semicolon separator (better for Brazilian Excel)
+    const header = Object.keys(csvData[0]);
+    const separator = ';'; // Using semicolon for better Excel compatibility
+    const csvContent = [
+      header.join(separator),
+      ...csvData.map(row => 
+        header.map(key => {
+          let value = String(row[key] || '');
+          // Clean up value and only quote if necessary
+          value = value.replace(/[\r\n]+/g, ' '); // Replace line breaks with spaces
+          if (value.includes(separator) || value.includes('\n') || value.includes('"')) {
+            value = '"' + value.replace(/"/g, '""') + '"';
+          }
+          return value;
+        }).join(separator)
+      )
+    ].join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `empresas_detalhado_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    
+    toast.success(`✅ ${empresas.length} empresas exportadas para CSV com ${header.length} colunas`);
+  };
+
+  const exportToExcel = () => {
+    if (empresas.length === 0) {
+      toast.error('Nenhum dado para exportar');
+      return;
+    }
+
+    // Find max number of socios to create appropriate columns
+    const maxSocios = Math.max(...empresas.map(empresa => empresa.socios?.length || 0));
+
+    // Prepare data for Excel export with each field in separate column
+    const excelData = empresas.map(empresa => {
+      const baseData = {
+        'CNPJ': formatCNPJ(empresa.cnpj) || '',
+        'CNPJ Básico': empresa.cnpjBasico || '',
+        'Razão Social': empresa.razaoSocial || '',
+        'Nome Fantasia': empresa.nomeFantasia || '',
+        'Matriz/Filial': empresa.matrizFilial || '',
+        'Situação Cadastral': empresa.situacaoDescricao || '',
+        'Data Situação': empresa.dataSituacao || '',
+        'Motivo Situação': empresa.motivoSituacao || '',
+        'Data Início Atividades': empresa.dataInicioAtividades || '',
+        'CNAE Principal': empresa.cnaePrincipal || '',
+        'CNAE Secundária': empresa.cnaeSecundaria || '',
+        'Natureza Jurídica': empresa.naturezaJuridica || '',
+        'Porte Empresa': empresa.porteEmpresa || '',
+        'Capital Social': empresa.capitalSocial || '',
+        'Tipo Logradouro': empresa.tipoLogradouro || '',
+        'Logradouro': empresa.logradouro || '',
+        'Número': empresa.numero || '',
+        'Complemento': empresa.complemento || '',
+        'Bairro': empresa.bairro || '',
+        'CEP': empresa.cep || '',
+        'UF': empresa.uf || '',
+        'Município': empresa.municipio || '',
+        'DDD 1': empresa.ddd1 || '',
+        'Telefone 1': empresa.telefone1 || '',
+        'DDD 2': empresa.ddd2 || '',
+        'Telefone 2': empresa.telefone2 || '',
+        'Email': empresa.email || '',
+        'Situação Especial': empresa.situacaoEspecial || '',
+        'Data Situação Especial': empresa.dataSituacaoEspecial || '',
+        'Opção Simples Nacional': empresa.opcaoSimples || '',
+        'Data Opção Simples': empresa.dataOpcaoSimples || '',
+        'Opção MEI': empresa.opcaoMei || '',
+        'Data Opção MEI': empresa.dataOpcaoMei || ''
+      };
+
+      // Add socios data in separate columns
+      const sociosData = {};
+      for (let i = 0; i < maxSocios; i++) {
+        const socio = empresa.socios?.[i];
+        sociosData[`Sócio ${i + 1} - Nome`] = socio?.nome || '';
+        sociosData[`Sócio ${i + 1} - CPF/CNPJ`] = socio?.cpf_cnpj || '';
+        sociosData[`Sócio ${i + 1} - Qualificação`] = socio?.qualificacao || '';
+        sociosData[`Sócio ${i + 1} - Data Entrada`] = socio?.data_entrada || '';
+        sociosData[`Sócio ${i + 1} - Faixa Etária`] = socio?.faixa_etaria || '';
+        sociosData[`Sócio ${i + 1} - País`] = socio?.pais || '';
+      }
+
+      return { ...baseData, ...sociosData };
+    });
+
+    // Create workbook and worksheet using XLSX library
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths for better formatting
+    const columnWidths = Object.keys(excelData[0]).map(key => {
+      const maxLength = Math.max(
+        key.length,
+        ...excelData.map(row => String(row[key] || '').length)
+      );
+      return { wch: Math.min(maxLength + 2, 50) }; // Max width of 50 chars
+    });
+    worksheet['!cols'] = columnWidths;
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Empresas');
+
+    // Generate and download the Excel file
+    const fileName = `empresas_detalhado_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+    
+    toast.success(`✅ ${empresas.length} empresas exportadas para XLSX com ${Object.keys(excelData[0]).length} colunas`);
+  };
+
   const toggleSocios = (empresaIndex) => {
     setExpandedSocios(prev => ({
       ...prev,
@@ -846,11 +1060,21 @@ const Dashboard = () => {
         {empresas.length > 0 && (
           <ResultsSection>
             <ResultsHeader>
-              <ResultsTitle>Resultados da Busca</ResultsTitle>
-              <ResultsInfo>
-                {empresas.length} empresas encontradas 
-                {totalPages > 1 && `(Página ${currentPage}/${totalPages})`}
-              </ResultsInfo>
+              <div>
+                <ResultsTitle>Resultados da Busca</ResultsTitle>
+                <ResultsInfo>
+                  {empresas.length} empresas encontradas 
+                  {totalPages > 1 && `(Página ${currentPage}/${totalPages})`}
+                </ResultsInfo>
+              </div>
+              <ExportButtonsContainer>
+                <ExportButton onClick={exportToCSV} disabled={empresas.length === 0}>
+                  📄 Exportar CSV
+                </ExportButton>
+                <ExportButton onClick={exportToExcel} disabled={empresas.length === 0}>
+                  📊 Exportar Excel
+                </ExportButton>
+              </ExportButtonsContainer>
             </ResultsHeader>
 
             <div style={{ overflowX: 'auto' }}>
