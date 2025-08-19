@@ -198,9 +198,17 @@ const GlassCard = styled.div`
 // Stats Section
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
   margin-top: 4rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
 `;
 
 const StatCard = styled(GlassCard)`
@@ -270,9 +278,13 @@ const FeatureDescription = styled.p`
 // Segments Section
 const SegmentsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-top: 4rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const SegmentCard = styled(GlassCard)`
@@ -324,6 +336,126 @@ const SectionSubtitle = styled.p`
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
+`;
+
+// Pricing Section
+const PricingCard = styled(GlassCard)`
+  max-width: 400px;
+  margin: 4rem auto 0;
+  text-align: center;
+  position: relative;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.1), 
+    rgba(147, 51, 234, 0.1)
+  );
+
+  &::before {
+    content: 'MAIS POPULAR';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    color: white;
+    padding: 0.5rem 2rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(59, 130, 246, 0.3);
+  }
+`;
+
+const PriceDisplay = styled.div`
+  font-size: 4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 2rem 0 1rem;
+  line-height: 1;
+`;
+
+const PriceSubtext = styled.div`
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+`;
+
+const PricingFeatures = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+  text-align: left;
+
+  li {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &::before {
+      content: '✓';
+      color: #00ff88;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+  }
+`;
+
+// Footer
+const Footer = styled.footer`
+  background: rgba(15, 15, 35, 0.9);
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 4rem 2rem 2rem;
+  margin-top: 6rem;
+`;
+
+const FooterContent = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 3rem;
+`;
+
+const FooterSection = styled.div`
+  h4 {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  p, a {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.5rem;
+
+    &:hover {
+      color: #3b82f6;
+      transition: color 0.3s ease;
+    }
+  }
+`;
+
+const FooterBottom = styled.div`
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  margin-top: 3rem;
+  padding-top: 2rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
 `;
 
 const LandingPage = () => {
@@ -492,26 +624,18 @@ const LandingPage = () => {
 
         <SegmentsGrid>
           <SegmentCard>
-            <SegmentEmoji>🍽️</SegmentEmoji>
-            <SegmentInfo>
-              <SegmentName>Alimentação e Restaurantes</SegmentName>
-              <SegmentStats>3.6M empresas conectadas</SegmentStats>
-            </SegmentInfo>
-          </SegmentCard>
-
-          <SegmentCard>
             <SegmentEmoji>👗</SegmentEmoji>
             <SegmentInfo>
               <SegmentName>Vestuário e Moda</SegmentName>
-              <SegmentStats>3.5M empresas mapeadas</SegmentStats>
+              <SegmentStats>3,5M empresas</SegmentStats>
             </SegmentInfo>
           </SegmentCard>
 
           <SegmentCard>
-            <SegmentEmoji>🏛️</SegmentEmoji>
+            <SegmentEmoji>🍽️</SegmentEmoji>
             <SegmentInfo>
-              <SegmentName>Organizações e Associações</SegmentName>
-              <SegmentStats>4.2M estruturas ativas</SegmentStats>
+              <SegmentName>Alimentação e Restaurantes</SegmentName>
+              <SegmentStats>3,6M empresas</SegmentStats>
             </SegmentInfo>
           </SegmentCard>
 
@@ -519,7 +643,7 @@ const LandingPage = () => {
             <SegmentEmoji>💄</SegmentEmoji>
             <SegmentInfo>
               <SegmentName>Beleza e Estética</SegmentName>
-              <SegmentStats>2.5M estabelecimentos</SegmentStats>
+              <SegmentStats>2,5M empresas</SegmentStats>
             </SegmentInfo>
           </SegmentCard>
 
@@ -527,23 +651,7 @@ const LandingPage = () => {
             <SegmentEmoji>🏪</SegmentEmoji>
             <SegmentInfo>
               <SegmentName>Comércio e Mercados</SegmentName>
-              <SegmentStats>2.5M pontos comerciais</SegmentStats>
-            </SegmentInfo>
-          </SegmentCard>
-
-          <SegmentCard>
-            <SegmentEmoji>💻</SegmentEmoji>
-            <SegmentInfo>
-              <SegmentName>Tecnologia e Informática</SegmentName>
-              <SegmentStats>800K empresas tech</SegmentStats>
-            </SegmentInfo>
-          </SegmentCard>
-
-          <SegmentCard>
-            <SegmentEmoji>🚛</SegmentEmoji>
-            <SegmentInfo>
-              <SegmentName>Transportes e Logística</SegmentName>
-              <SegmentStats>2.1M rotas mapeadas</SegmentStats>
+              <SegmentStats>2,5M empresas</SegmentStats>
             </SegmentInfo>
           </SegmentCard>
 
@@ -551,27 +659,207 @@ const LandingPage = () => {
             <SegmentEmoji>🏗️</SegmentEmoji>
             <SegmentInfo>
               <SegmentName>Construção Civil</SegmentName>
-              <SegmentStats>2.3M projetos indexados</SegmentStats>
+              <SegmentStats>2,3M empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>🚛</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Transportes e Logística</SegmentName>
+              <SegmentStats>2,1M empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>💼</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Serviços Profissionais</SegmentName>
+              <SegmentStats>2,0M empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>🛍️</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Varejo Especializado</SegmentName>
+              <SegmentStats>1,5M empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>📚</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Educação e Treinamento</SegmentName>
+              <SegmentStats>1,2M empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>🚗</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Automóveis e Oficinas</SegmentName>
+              <SegmentStats>1,0M empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>💻</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Tecnologia e Informática</SegmentName>
+              <SegmentStats>800K empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>💊</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Saúde e Farmácias</SegmentName>
+              <SegmentStats>700K empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>🏠</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Serviços Domésticos</SegmentName>
+              <SegmentStats>500K empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>🍰</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Alimentação - Produção</SegmentName>
+              <SegmentStats>400K empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>📱</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Comunicação e Mídia</SegmentName>
+              <SegmentStats>300K empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>🌾</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Agricultura e Pecuária</SegmentName>
+              <SegmentStats>200K empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>⚡</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Energia e Utilities</SegmentName>
+              <SegmentStats>100K empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>💰</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Finanças e Seguros</SegmentName>
+              <SegmentStats>100K empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>🏛️</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Organizações e Associações</SegmentName>
+              <SegmentStats>4,2M empresas</SegmentStats>
+            </SegmentInfo>
+          </SegmentCard>
+
+          <SegmentCard>
+            <SegmentEmoji>📋</SegmentEmoji>
+            <SegmentInfo>
+              <SegmentName>Outros Setores</SegmentName>
+              <SegmentStats>Demais atividades</SegmentStats>
             </SegmentInfo>
           </SegmentCard>
         </SegmentsGrid>
       </Section>
 
-      {/* CTA Final */}
+      {/* Pricing Section */}
       <Section style={{ textAlign: 'center' }}>
-        <SectionTitle>Pronto para Acessar 66 Milhões de Empresas?</SectionTitle>
-        <SectionSubtitle style={{ marginBottom: '2rem' }}>
-          Base oficial da Receita Federal • Dados atualizados • Performance superior
+        <SectionTitle>Escolha Seu Plano</SectionTitle>
+        <SectionSubtitle>
+          Acesso completo à maior base de dados empresariais do Brasil
         </SectionSubtitle>
         
-        <CTAButton 
-          style={{ fontSize: '1.2rem', padding: '1.25rem 2.5rem' }}
-          onClick={() => navigate('/dashboard')}
-        >
-          <Sparkles size={24} />
-          Iniciar Consulta Agora
-        </CTAButton>
+        <PricingCard onClick={() => navigate('/dashboard')}>
+          <h3 style={{ color: 'white', fontSize: '1.5rem', margin: '0 0 1rem 0' }}>
+            Plano Profissional
+          </h3>
+          <PriceDisplay>R$ 79,90</PriceDisplay>
+          <PriceSubtext>por mês</PriceSubtext>
+          
+          <PricingFeatures>
+            <li>Acesso a 66 milhões de empresas</li>
+            <li>Consultas ilimitadas até 50k por vez</li>
+            <li>Exportação profissional Excel/CSV</li>
+            <li>Dados completos + sócios</li>
+            <li>Todos os 20 segmentos</li>
+            <li>Filtros avançados</li>
+            <li>Performance otimizada</li>
+            <li>Suporte técnico</li>
+          </PricingFeatures>
+          
+          <CTAButton style={{ 
+            width: '100%', 
+            fontSize: '1.2rem', 
+            padding: '1rem',
+            marginTop: '1rem'
+          }}>
+            <Sparkles size={24} />
+            Começar Agora
+          </CTAButton>
+        </PricingCard>
       </Section>
+
+      <Footer>
+        <FooterContent>
+          <FooterSection>
+            <h4>Empresas Brasil</h4>
+            <p>A maior e mais completa base de dados empresariais do Brasil. 
+               66 milhões de empresas com informações atualizadas da Receita Federal.</p>
+          </FooterSection>
+          
+          <FooterSection>
+            <h4>Funcionalidades</h4>
+            <a href="#features">Consulta em Massa</a>
+            <a href="#features">Filtros Avançados</a>
+            <a href="#features">Exportação Excel/CSV</a>
+            <a href="#features">20 Segmentos</a>
+          </FooterSection>
+          
+          <FooterSection>
+            <h4>Suporte</h4>
+            <a href="mailto:contato@empresasbrasil.com">contato@empresasbrasil.com</a>
+            <a href="tel:+5511999999999">(11) 99999-9999</a>
+            <a href="#help">Central de Ajuda</a>
+            <a href="#docs">Documentação</a>
+          </FooterSection>
+          
+          <FooterSection>
+            <h4>Empresa</h4>
+            <a href="#about">Sobre Nós</a>
+            <a href="#privacy">Política de Privacidade</a>
+            <a href="#terms">Termos de Uso</a>
+            <a href="#security">Segurança</a>
+          </FooterSection>
+        </FooterContent>
+        
+        <FooterBottom>
+          <p>&copy; 2025 Empresas Brasil. Todos os direitos reservados.</p>
+          <p>Dados oficiais da Receita Federal • CNPJ • Sistema Seguro</p>
+        </FooterBottom>
+      </Footer>
     </Container>
   );
 };
