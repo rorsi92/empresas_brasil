@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config frontend/vite.config.js",
-    "build": "vite build --config frontend/vite.config.js",
+    "build": "node build.js",
     "preview": "vite preview --config frontend/vite.config.js --host 0.0.0.0",
     "start": "npm run build && npm run preview",
     "lint": "eslint frontend/src"

@@ -4,8 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  root: 'frontend',
-  publicDir: 'public',
+  root: '.',
+  publicDir: 'frontend/public',
   server: {
     port: 4001,
     host: true,
@@ -21,7 +21,7 @@ export default defineConfig({
     host: true,
   },
   build: {
-    outDir: '../dist',
+    outDir: 'dist',
     emptyOutDir: true,
     sourcemap: false,
     chunkSizeWarningLimit: 1600,
