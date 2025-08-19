@@ -137,3 +137,28 @@ curl -X POST http://localhost:6000/api/companies/filtered \
 - **Claude Code**: ✅ Sem timeout, inicia normalmente
 
 **🚨 SISTEMA PRONTO PARA PRODUÇÃO - ZERO BUGS CONFIRMADO**
+
+---
+**⚠️ ATUALIZAÇÃO CRÍTICA - SISTEMA CORRIGIDO v6.1 (19/08/2025)**
+
+#### ✅ Correções Críticas Implementadas:
+- **SEGMENTAÇÃO CORRIGIDA**: CNAEs do segmento "Transportes e Logística" (ID 6) corrigidos
+  - ❌ **Antes**: 8630501,8630503,8640205 (atividades médicas) 
+  - ✅ **Depois**: 4930201,4930202,5320202,5229099 (transportes reais)
+- **PERFORMANCE OTIMIZADA**: Query de sócios otimizada para consultas de 50k empresas
+  - Limite inteligente: 3 sócios/empresa para consultas grandes (vs 5)
+  - Query otimizada com ROW_NUMBER() para melhor performance
+  - Limite total: 150k sócios (vs 250k anterior)
+- **UX MELHORADA**: Barra de progresso com avisos nos últimos 5%
+  - "⏳ Os últimos 5% podem levar até 1 minuto (carregando dados dos sócios)"
+
+#### 📊 Testes de Validação (19/08/2025):
+- ✅ **Segmento Transportes**: Retorna empresas de transporte corretas
+- ✅ **50k empresas**: Performance estável sem travamentos  
+- ✅ **Query de sócios**: Otimizada e funcionando
+- ✅ **Barra de progresso**: Avisos claros sobre etapas
+
+#### 🔒 REGRAS CRÍTICAS ATUALIZADAS:
+1. **NUNCA alterar** mapeamento de CNAEs em server.js linhas 549-556
+2. **NUNCA alterar** query otimizada de sócios linhas 686-720
+3. **NUNCA alterar** lógica da barra de progresso Dashboard.jsx linhas 830-841
