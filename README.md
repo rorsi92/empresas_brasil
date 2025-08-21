@@ -2,7 +2,7 @@
 
 Sistema completo para consulta de empresas brasileiras com dados da Receita Federal. **66 milhões de empresas** com informações detalhadas de CNPJs, sócios e representantes legais.
 
-**🚀 Auto-deploy via Railway habilitado e conectado ao GitHub!**
+**🚀 Auto-deploy via Railway - Teste de deploy automático - 21/08/2025!**
 
 ## 🚀 **SISTEMA 100% FUNCIONAL E OTIMIZADO**
 

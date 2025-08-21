@@ -1,0 +1,30 @@
+INSTRUÇÕES PARA DEPLOY MANUAL:
+
+1. Abra o PowerShell ou Command Prompt (aperte Windows+R, digite "cmd" e Enter)
+
+2. Copie e cole estes comandos, um por vez:
+
+cd C:\Users\rodri\empresas_brasil
+railway login
+railway link
+railway up
+
+3. O que vai acontecer em cada comando:
+   - railway login: Abre o navegador para login com GitHub
+   - railway link: Mostra lista de projetos, escolha "empresas_brasil"
+   - railway up: Faz o deploy (demora 2-5 minutos)
+
+4. Após terminar, verifique em:
+   https://railway.app/dashboard
+   
+   Deve mostrar "Deployed just now"
+
+ALTERNATIVA - Deploy direto pelo Railway Dashboard:
+
+1. Acesse: https://railway.app/dashboard
+2. Clique no projeto "empresas_brasil"
+3. Clique em um dos serviços (backend ou frontend)
+4. Aba "Deployments"
+5. Clique nos 3 pontinhos do último deploy
+6. Clique em "Redeploy"
+7. Repita para o outro serviço
