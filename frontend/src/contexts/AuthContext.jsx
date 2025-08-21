@@ -50,9 +50,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (email, password) => {
+  const register = async (email, password, firstName) => {
     try {
-      const response = await authService.register(email, password);
+      const response = await authService.register(email, password, firstName);
       
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));

@@ -69,7 +69,7 @@ function validateBusinessEmail(email) {
  * POST /api/auth/register - Cadastro com verificação de email
  */
 router.post('/register', async (req, res) => {
-  const { email, password, firstName, lastName } = req.body;
+  const { email, password, firstName } = req.body;
   const clientIP = req.ip || req.connection.remoteAddress || '127.0.0.1';
   
   try {
@@ -86,11 +86,11 @@ router.post('/register', async (req, res) => {
     }
     
     // Validar entrada básica
-    if (!email || !password || !firstName || !lastName) {
+    if (!email || !password) {
       console.log(`❌ REGISTER FAILED: Missing required fields`);
       return res.status(400).json({
         success: false,
-        message: 'Email, senha, nome e sobrenome são obrigatórios'
+        message: 'Email e senha são obrigatórios'
       });
     }
     
@@ -148,7 +148,7 @@ router.post('/register', async (req, res) => {
       RETURNING id, uuid, email, first_name, last_name, status, role, subscription_status, subscription_expires, created_at`,
       [
         uuid, email, passwordHash, passwordSalt,
-        firstName || null, lastName || null,
+        firstName || 'Usuário', '', // lastName removido
         emailVerificationToken, emailVerificationExpires,
         'active', 'user', 'active', trialExpires, // 🎯 ATIVO COM TRIAL
         true, // Email já verificado

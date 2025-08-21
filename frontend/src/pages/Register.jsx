@@ -236,7 +236,7 @@ const Register = () => {
 
   const onSubmit = async (data) => {
     setLoading(true);
-    const result = await registerUser(data.email, data.password);
+    const result = await registerUser(data.email, data.password, data.firstName);
     
     if (result.success) {
       navigate('/dashboard');
@@ -251,9 +251,26 @@ const Register = () => {
         <Title>Cadastro</Title>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <FormGroup>
+            <Label>Nome</Label>
+            <Input
+              type="text"
+              placeholder="Seu nome"
+              {...register('firstName', {
+                required: 'Nome é obrigatório',
+                minLength: {
+                  value: 2,
+                  message: 'Nome deve ter pelo menos 2 caracteres'
+                }
+              })}
+            />
+            {errors.firstName && <ErrorMessage>{errors.firstName.message}</ErrorMessage>}
+          </FormGroup>
+          
+          <FormGroup>
             <Label>Email</Label>
             <Input
               type="email"
+              placeholder="seu@email.com"
               {...register('email', {
                 required: 'Email é obrigatório',
                 pattern: {
